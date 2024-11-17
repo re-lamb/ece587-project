@@ -1,0 +1,127 @@
+ffff_ffff_ffff_ffff nr
+ffff_fmmm_ffff_ffff r
+ffff_fmmm_fnnn_ffff rr
+ffff_fmmm_sfff_iiii ri5
+ffff_fmmm_siii_iiii ri8
+ffff_fmmm_snnn_iiii rri5
+ffff_ffff_sfff_iiii i5
+ffff_ffff_siii_iiii i8
+ffff_siii_iiii_iiii i12
+
+			   iiii - always pass
+     	  iiii      - pass or i[7]
+     iiii           - pass or i[7]
+
+nr:						ffff_ffff_ffff_ffff
+nop						0000_0000_0000_0000
+clrt					0000_0000_0000_0001
+sett					0000_0000_0000_0010
+nott					0000_0000_0000_0011
+rts						0000_0000_0000_0100
+rte						0000_0000_0000_0101
+intc					0000_0000_0000_0110
+ints					0000_0000_0000_0111
+ebreak					0000_0000_0000_1000 ** sim
+exit					0000_0000_0000_1001 ** sim
+		
+r:						0001_fmmm_ffff_ffff
+movt	Dm				0001_0mmm_0000_0000
+dt		Dm				0001_0mmm_0000_0001
+dt		Am				0001_0mmm_0000_0010
+braf	Am				0001_0mmm_0000_0011
+bsrf	Am				0001_0mmm_0000_0100
+jmp		Am				0001_0mmm_0000_0101
+jsr		Am				0001_0mmm_0000_0110
+sgz		Dm				0001_0mmm_0000_0111
+sgzu	Dm				0001_0mmm_0000_1000
+
+rr:						0010_fmmm_fnnn_ffff
+mov 	Dn,Dm			0010_0mmm_0nnn_0000
+mova 	Dn,Am			0010_0mmm_0nnn_0001
+mova 	An,Am			0010_0mmm_0nnn_0010
+mov 	An,Dm			0010_0mmm_0nnn_0011
+ld.b	@An,Dm			0010_0mmm_0nnn_0100 *
+ld.w	@An,Dm			0010_0mmm_0nnn_0101 *
+ld.l	@An,Dm			0010_0mmm_0nnn_0110 ***
+st.b	Dm,@An			0010_0mmm_0nnn_0111	*			
+st.w	Dm,@An			0010_0mmm_0nnn_1000 *
+st.l	Dm,@An			0010_0mmm_0nnn_1001 ***
+add		Dn,Dm			0010_0mmm_0nnn_1010
+addc	Dn,Dm			0010_0mmm_0nnn_1011
+addv	Dn,Dm   		0010_0mmm_0nnn_1100
+adda	An,Am   		0010_0mmm_0nnn_1101         
+adda	Dn,Am   		0010_0mmm_0nnn_1110
+sub		Dn,Dm   		0010_0mmm_0nnn_1111      
+subc	Dn,Dm			0010_0mmm_1nnn_0000
+subv	Dn,Dm			0010_0mmm_1nnn_0001
+suba	An,Am   		0010_0mmm_1nnn_0010
+suba	Dn,Am   		0010_0mmm_1nnn_0011
+and		Dn,Dm   		0010_0mmm_1nnn_0100
+tst		Dn,Dm   		0010_0mmm_1nnn_0101
+neg		Dn,Dm   		0010_0mmm_1nnn_0110
+negc	Dn,Dm   		0010_0mmm_1nnn_0111  
+not		Dn,Dm   		0010_0mmm_1nnn_1000
+or		Dn,Dm   		0010_0mmm_1nnn_1001
+xor		Dn,Dm   		0010_0mmm_1nnn_1010
+seq		Dn,Dm   		0010_0mmm_1nnn_1011
+sge		Dn,Dm			0010_0mmm_1nnn_1100
+sgeu	Dn,Dm           0010_0mmm_1nnn_1101
+sgt		Dn,Dm           0010_0mmm_1nnn_1110 
+sgtu	Dn,Dm           0010_0mmm_1nnn_1111 
+exts.b	Dn,Dm			0010_1mmm_0nnn_0000
+exts.w	Dn,Dm			0010_1mmm_0nnn_0001 ***
+extu.b	Dn,Dm			0010_1mmm_0nnn_0010
+extu.w	Dn,Dm   		0010_1mmm_0nnn_0011 ***
+sll		Dn,Dm			0010_1mmm_0nnn_0100   		
+srl		Dn,Dm			0010_1mmm_0nnn_0101   		
+sra		Dn,Dm			0010_1mmm_0nnn_0110
+rot		Dn,Dm			0010_1mmm_0nnn_0111
+
+ri5:					0011_fmmm_sfff_iiii
+bclr 	#imm5,Dm		0011_0mmm_s000_iiii
+bset 	#imm5,Dm        0011_0mmm_s001_iiii
+bnot	#imm5,Dm        0011_0mmm_s010_iiii
+btst 	#imm5,Dm        0011_0mmm_s011_iiii
+slli	#imm5,Dm        0011_0mmm_s100_iiii
+srli	#imm5,Dm        0011_0mmm_s101_iiii
+srai	#imm5,Dm        0011_0mmm_s110_iiii
+roti	#imm5,Dm        0011_0mmm_s111_iiii
+
+rri5:					01xx_fmmm_snnn_iiii
+lda		@(disp,An),Am	0100_0mmm_snnn_iiii
+sta		Am,@(disp,An)	0100_1mmm_snnn_iiii
+ld.b	@(disp,An),Dm	0101_0mmm_snnn_iiii
+st.b	Dm,@(disp,An)   0101_1mmm_snnn_iiii
+ld.w	@(disp,An),Dm   0110_0mmm_snnn_iiii
+st.w	Dm,@(disp,An)   0110_1mmm_snnn_iiii
+ld.l	@(disp,An),Dm   0111_0mmm_snnn_iiii ***
+st.l	Dm,@(disp,Dn)   0111_1mmm_snnn_iiii ***
+
+i8:						1000_ffff_siii_iiii
+andi	#imm,D0			1000_0000_siii_iiii
+ori		#imm,D0         1000_0001_siii_iiii
+xori	#imm,D0         1000_0010_siii_iiii
+tsti	#imm,D0         1000_0011_siii_iiii
+
+bf		label         	1000_0100_siii_iiii
+bt		label           1000_0101_siii_iiii
+
+ri8:					1xxx_0mmm_siii_iiii
+ld.w	@(disp,PC),Dm	1001_0mmm_siii_iiii
+ld.l	@(disp,PC),Dm	1001_1mmm_siii_iiii ***
+lda 	@(disp,PC),Am	1010_0mmm_siii_iiii 
+						1010_1mmm_siii_iiii 
+addi	#imm,Dm			1011_0mmm_siii_iiii
+addi	#imm,Am			1011_1mmm_siii_iiii
+seq		#imm,Dm			1100_0mmm_siii_iiii
+movi 	#imm,Dm			1100_1mmm_siii_iiii
+						1101_0mmm_siii_iiii
+						1101_1mmm_siii_iiii
+
+i12:					
+bra		label			1110_siii_iiii_iiii
+bsr		label           1111_siii_iiii_iiii
+
+default rs1 = mmm
+		rs2 = nnn
+		rd  = mmm
