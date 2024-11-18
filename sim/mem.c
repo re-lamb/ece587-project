@@ -15,12 +15,12 @@ int16_t loadop(int16_t addr, int16_t offset, InstNum func)
     {
         case ldb:
             ret = memload(addr + offset, 1);
-	    break;
+        break;
 
         case ldw:
-			offset <<= 1;
+            offset <<= 1;
             ret = memload(addr + offset, 2);
-	    break;
+        break;
 
         default:
             fprintf(stderr, "Illegal load op: %d\n", func);
@@ -41,7 +41,7 @@ void storeop(int16_t addr, int16_t offset, InstNum func, int16_t value)
             break;
 
         case stw:
-			offset <<= 1;
+            offset <<= 1;
             memstore(addr + offset, 2, value);
             break;
     
@@ -58,7 +58,7 @@ int16_t memload(uint16_t addr, uint8_t size)
 {
     int16_t ret;
 
-	// oops this isn't possible - save for 32-bit impl
+    // oops this isn't possible - save for 32-bit impl
     if ((addr + size-1) >= MEMSZ)
     {
         fprintf(stderr, "Load from 0x%04X out of range\n", (uint16_t)addr);
@@ -80,8 +80,8 @@ int16_t memload(uint16_t addr, uint8_t size)
             fprintf(stderr, "Illegal load request (%d bytes) at 0x%04X\n", size, addr);
             exit(-1);
     }
-	
-	// if (debug) fprintf(stderr, "Load request (%d bytes) at 0x%04X, val 0x%04X\n", size, addr, (uint16_t)ret);
+    
+    // if (debug) fprintf(stderr, "Load request (%d bytes) at 0x%04X, val 0x%04X\n", size, addr, (uint16_t)ret);
     return (int16_t)ret;
 }
 
@@ -107,6 +107,6 @@ void memstore(uint16_t addr, uint8_t size, int16_t value)
             fprintf(stderr, "Illegal store request (%d bytes) at 0x%04X\n", size, addr);
             exit(-1);
     }
-	
-	// if (debug) fprintf(stderr, "Store request (%d bytes) at 0x%04X, val 0x%04X\n", size, addr, (uint16_t)value);
+    
+    // if (debug) fprintf(stderr, "Store request (%d bytes) at 0x%04X, val 0x%04X\n", size, addr, (uint16_t)value);
 }

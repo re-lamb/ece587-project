@@ -15,7 +15,7 @@ CC=gcc -Wall
 
 #
 # Build the simulator
-#	
+#
 sim: $(OBJS) $(INCLUDES)
 	$(CC) -o $(PROG) $(OBJS)
 
@@ -25,7 +25,7 @@ sim: $(OBJS) $(INCLUDES)
 TESTDIR=../asm
 
 tests: FORCE
-	@cd $(TESTDIR) && $(MAKE) all 
+	@cd $(TESTDIR) && $(MAKE) all
 
 check: FORCE
 	@cd $(TESTDIR) && $(MAKE) check

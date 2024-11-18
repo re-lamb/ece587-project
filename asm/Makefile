@@ -18,8 +18,9 @@ TESTS=$(wildcard *.mem)
 
 all: $(TESTOBJ)
 
+# tests return r0 as exit code 
 check: $(TESTS)
-	@for f in $(TESTS); do 					\
+	@for f in $(TESTS); do					\
 		echo "";							\
 		echo -n "Running test $$f...";		\
 		$(PROG) -d $$f >> test.log 2>&1;	\
@@ -32,4 +33,4 @@ check: $(TESTS)
 
 clean:
 	@rm -f *.mem test.log
-	
+

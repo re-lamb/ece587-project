@@ -5,13 +5,13 @@
  * usage: sim [-h] [-dvi] [-b bkpt] [-p pc] [-s stack] [[-f] filename]
  *
  * args:
- *      -h			print usage message
- *      -d      	enable debug output
- *      -v      	enable verbose output
- *      -i      	interactive (single step)
- *      -b 			bkpt set a breakpoint
- *      -p pc  		set the initial program counter
- *      -f file 	read from 'file'
+ *      -h          print usage message
+ *      -d          enable debug output
+ *      -v          enable verbose output
+ *      -i          interactive (single step)
+ *      -b          bkpt set a breakpoint
+ *      -p pc       set the initial program counter
+ *      -f file     read from 'file'
  */
 
 #include "defs.h"
@@ -40,8 +40,8 @@ uint8_t *loadfile(FILE *fp)
 {
     char *line;
     char buf[MAXLINELEN];
-	char junk[MAXLINELEN];
-	
+    char junk[MAXLINELEN];
+    
     uint addr, low, hi, value;
     int lc = 0;
 
@@ -56,13 +56,13 @@ uint8_t *loadfile(FILE *fp)
     while ((line = fgets(buf, MAXLINELEN, fp)) != NULL)
     {
         lc++;
-		
-		if (sscanf(line, " %s | %x | %x %x ; %s", junk, &addr, &hi, &low, junk) != 5)
+        
+        if (sscanf(line, " %s | %x | %x %x ; %s", junk, &addr, &hi, &low, junk) != 5)
         {
             fprintf(stderr, "Bad input at line %d ignored: '%s'\n", lc, line);
             continue;
         }
-		
+        
         // make sure the address is in range
         if (addr > MEMSZ-1)
         {
@@ -70,8 +70,8 @@ uint8_t *loadfile(FILE *fp)
             continue;
         }
 
-		// assemble a little endian word
-		value = (hi << 8) | low;
+        // assemble a little endian word
+        value = (hi << 8) | low;
 
         // use the store function to copy into main mem
         memstore(addr, 2, value);
@@ -125,11 +125,11 @@ int main(int argc, char *argv[])
 
             case 'b':
                 breakpoint = 1;
-                breakAddr = (uint16_t)strtol(optarg, NULL, 0);	// auto-detect radix
+                breakAddr = (uint16_t)strtol(optarg, NULL, 0);  // auto-detect radix
                 break;
 
             case 'p':
-                pc = (uint16_t)strtol(optarg, NULL, 0);   		// auto-detect radix
+                pc = (uint16_t)strtol(optarg, NULL, 0);         // auto-detect radix
                 break;
 
             case 'f':
@@ -180,5 +180,5 @@ int main(int argc, char *argv[])
     setraw();
     int status = run(pc);
     setcooked();
-	exit(status);
+    exit(status);
 }

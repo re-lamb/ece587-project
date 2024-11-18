@@ -16,13 +16,13 @@
 #include <unistd.h>
 
 #define MEMSZ       0x10000
-#define NUMREGS		16
+#define NUMREGS     16
 
-#define XLEN    	16
-#define SIGNBIT(x) 	(1 << (x))	
-#define AREG(x)		(x + 8)
+#define XLEN        16
+#define SIGNBIT(x)  (1 << (x))  
+#define AREG(x)     (x + 8)
 
-#define RA 			8
+#define RA          8
 
 typedef enum opform
 {
@@ -31,32 +31,32 @@ typedef enum opform
 
 typedef enum optype
 {
-	control, aluRtype, aluItype, memOp, branch, envcall
+    control, aluRtype, aluItype, memOp, branch, envcall
 } OpType;
 
 typedef enum instnum
 {
-    nop,	clrt,	sett,	nott,	rts,	rte,	intc,	ints,
-	movt,	dt,		braf,	bsrf,	jmp,	jsr,	sgz,	sgzu,
-	mov,	ldb,	ldw,	stb,	stw,	add,	addc,	addv,
-	sub,	subc,	subv,	and,	tst,	neg,	negc,	not,
-	or,		xor,	seq,	sge,	sgeu,	sgt,	sgtu,	exts,
-	extu,	sll,	srl,	sra,	rot,	bclr,	bset,	bnot,
-	btst,	bf,		bt,		bra,	bsr,	ebreak,	exitprog, 	
-	unknown
+    nop,    clrt,   sett,   nott,   rts,    rte,    intc,   ints,
+    movt,   dt,     braf,   bsrf,   jmp,    jsr,    sgz,    sgzu,
+    mov,    ldb,    ldw,    stb,    stw,    add,    addc,   addv,
+    sub,    subc,   subv,   and,    tst,    neg,    negc,   not,
+    or,     xor,    seq,    sge,    sgeu,   sgt,    sgtu,   exts,
+    extu,   sll,    srl,    sra,    rot,    bclr,   bset,   bnot,
+    btst,   bf,     bt,     bra,    bsr,    ebreak, exitprog,   
+    unknown
 } InstNum;
 
 typedef struct decodedInst
 {
-	uint opcode;
+    uint opcode;
     OpFormat form;
     InstNum func;
-	OpType type;
+    OpType type;
     int rd;
     int rs1;
     int rs2;
     short imm;
-	bool wbr;
+    bool wbr;
 } Instruction;
 
 extern int debug;
