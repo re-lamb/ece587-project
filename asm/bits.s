@@ -35,7 +35,6 @@
 	seq #-2, d3
 	bf fail
 	
-	
     nop
     nop
     nop

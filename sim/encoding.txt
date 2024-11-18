@@ -77,6 +77,24 @@ srl     Dn,Dm           0010_1mmm_0nnn_0101
 sra     Dn,Dm           0010_1mmm_0nnn_0110
 rot     Dn,Dm           0010_1mmm_0nnn_0111
 
+mul.b   Dn,Dm           0010_1mmm_0nnn_1000 
+mul.w   Dn,Dm           0010_1mmm_0nnn_1001
+mul.1   Dn,Dm           0010_1mmm_0nnn_1010 ***
+div.b   Dn,Dm           0010_1mmm_0nnn_1011
+div.w   Dn,Dm           0010_1mmm_0nnn_1100
+div.1   Dn,Dm           0010_1mmm_0nnn_1101 ***
+
+mulu.b  Dn,Dm           0010_1mmm_0nnn_1110
+mulu.w  Dn,Dm           0010_1mmm_0nnn_1111
+mulu.l  Dn,Dm           0010_1mmm_1nnn_0000 ***
+divu.b  Dn,Dm           0010_1mmm_1nnn_0001
+divu.w  Dn,Dm           0010_1mmm_1nnn_0010
+divu.l  Dn,Dm           0010_1mmm_1nnn_0011 ***
+                        
+mod.b   Dn,Dm           0010_1mmm_1nnn_0100 
+mod.w   Dn,Dm           0010_1mmm_1nnn_0101
+mod.l   Dn,Dm           0010_1mmm_1nnn_0110 ***
+
 ri5:                    0011_fmmm_sfff_iiii
 bclr    #imm5,Dm        0011_0mmm_s000_iiii
 bset    #imm5,Dm        0011_0mmm_s001_iiii
@@ -103,8 +121,15 @@ ori     #imm,D0         1000_0001_siii_iiii
 xori    #imm,D0         1000_0010_siii_iiii
 tsti    #imm,D0         1000_0011_siii_iiii
 
-bf      label           1000_0100_siii_iiii
-bt      label           1000_0101_siii_iiii
+mului   #imm8,D0        1000_0100_siii_iiii
+divui   #imm8,D0        1000_0101_siii_iiii
+modi    #imm8,D0        1000_0110_siii_iiii
+
+muli    #imm8,D0        1000_1000_siii_iiii
+divi    #imm8,D0        1000_1001_siii_iiii
+                           
+bf      label           1000_1010_siii_iiii
+bt      label           1000_1011_siii_iiii
 
 ri8:                    1xxx_0mmm_siii_iiii
 ld.w    @(disp,PC),Dm   1001_0mmm_siii_iiii

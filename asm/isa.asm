@@ -113,6 +113,17 @@
     srl		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0101
     sra		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0110
     rot		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0111
+	mul.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1000 
+	mul.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1001
+	div.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1011
+	div.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1100
+	mulu.b  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1110
+	mulu.w  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1111
+	divu.b  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0001
+	divu.w  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0010					
+	mod.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0100 
+	mod.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0101
+
 }
 
 #ruledef
@@ -142,12 +153,17 @@
 
 #ruledef
 {
-    andi	#{imm: i8},d0	=> 0b1000_0000 @ imm
-	ori		#{imm: i8},d0   => 0b1000_0001 @ imm
-	xori	#{imm: i8},d0   => 0b1000_0010 @ imm
-	tsti	#{imm: i8},d0   => 0b1000_0011 @ imm
-	bf		{label: disp8}  => 0b1000_0100 @ label
-	bt		{label: disp8}	=> 0b1000_0101 @ label
+    andi	#{imm: u8},d0	=> 0b1000_0000 @ imm
+	ori		#{imm: u8},d0   => 0b1000_0001 @ imm
+	xori	#{imm: u8},d0   => 0b1000_0010 @ imm
+	tsti	#{imm: u8},d0   => 0b1000_0011 @ imm
+	mului	#{imm: u8},d0   => 0b1000_0100 @ imm
+	divui	#{imm: u8},d0   => 0b1000_0101 @ imm
+	modi 	#{imm: u8},d0   => 0b1000_0110 @ imm	
+	muli	#{imm: i8},d0   => 0b1000_1000 @ imm
+	divi 	#{imm: i8},d0   => 0b1000_1001 @ imm
+	bf		{label: disp8}  => 0b1000_1010 @ label
+	bt		{label: disp8}	=> 0b1000_1011 @ label
 }
 
 #ruledef
@@ -166,8 +182,9 @@
     bsr		{label: disp12} => 0b1111 @ label
 }
 
-#ruledef
+#ruledef	; pseudo ops
 {
-    ld.w    {label: disp8},{m: DREG}      => 0b1001_0 @ m @ label
-    lda 	{label: disp8},{m: AREG}      => 0b1010_0 @ m @ label
+    ld.w    {label: disp8},{m: DREG}      	=> 0b1001_0 @ m @ label
+    lda 	{label: disp8},{m: AREG}      	=> 0b1010_0 @ m @ label
+	clr 	{m: DREG}					  	=>	asm { xor {m}, {m} }
 }

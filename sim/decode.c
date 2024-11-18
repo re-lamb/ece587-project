@@ -333,6 +333,54 @@ Instruction decode(uint16_t value)
                 case 39:
                     this.func = rot;    // Dm rotate by Dn to Dm
                     break;
+                    
+                case 40:
+                    this.func = mulb;  
+                    break;
+                    
+                case 41:
+                    this.func = mulw;  
+                    break;
+                
+                // case 42: mul.l
+                
+                case 43:
+                    this.func = divb;  
+                    break;
+                    
+                case 44:
+                    this.func = divw;  
+                    break;
+                    
+                // case 45: div.l
+                
+                case 46:
+                    this.func = mulub;  
+                    break;
+                    
+                case 47:
+                    this.func = muluw;  
+                    break;
+                    
+                // case 48: mulu.l
+                
+                case 49:
+                    this.func = divub;  
+                    break;
+                    
+                case 50:
+                    this.func = divuw;  
+                    break;
+                    
+                // case 51: divu.l
+                
+                case 52:
+                    this.func = modb;  
+                    break;
+                    
+                case 53:
+                    this.func = modw;  
+                    break;
             }
             break;
 
@@ -422,46 +470,67 @@ Instruction decode(uint16_t value)
             
             this.form = i8;
             this.type = aluItype;
+            this.rs1 = 0;
+            this.rd = 0;
+            
             this.wbr = true;
             this.imm =  (value & 0xff);
+            int16_t ext = (value & SIGNBIT(7)) ? this.imm |= 0xff00 : this.imm;
 
             switch (funct4) 
             {
                 case 0:
                     this.func = and;    // D0 & imm to D0
-                    this.rs1 = 0;
-                    this.rd = 0;
                     break;
                 
                 case 1:
                     this.func = or;     // D0 | imm to D0
-                    this.rs1 = 0;
-                    this.rd = 0;
                     break;
                     
                 case 2:
                     this.func = xor;    // D0 ^ imm to D0
-                    this.rs1 = 0;
-                    this.rd = 0;
                     break;
                     
                 case 3:
                     this.func = tst;    // D0 & imm -> T
-                    this.rs1 = 0;
                     this.wbr = false;
                     break;
                     
                 case 4:
-                    this.type = branch;
-                    this.func = bf;     // branch false
-                    if (value & SIGNBIT(7)) this.imm |= 0xff00;
-                    this.wbr = false;
+                    this.func = muluw;  // D0 * imm to D0
                     break;
                     
                 case 5:
+                    this.func = divuw;  // D0 / imm to D0
+                    break;
+                    
+                case 6:
+                    this.func = modw;   // D0 % imm to D0
+                    break;
+                    
+                // case 7: rsvd
+                
+                case 8:
+                    this.func = mulw;   // D0 * imm to D0
+                    this.imm = ext;
+                    break;
+                    
+                case 9:
+                    this.func = divw;   // D0 / imm to D0
+                    this.imm = ext;
+                    break;
+                
+                case 10:
+                    this.type = branch;
+                    this.func = bf;     // branch false
+                    this.imm = ext;
+                    this.wbr = false;
+                    break;
+                    
+                case 11:
                     this.type = branch;
                     this.func = bt;     // branch true
-                    if (value & SIGNBIT(7)) this.imm |= 0xff00;
+                    this.imm = ext;
                     this.wbr = false;
                     break;
             }

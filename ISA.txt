@@ -65,6 +65,24 @@ srl     Dn,Dm               ((Dm << Dn)zero ext.) -> Dm         // shift right l
 sra     Dn,Dm               ((Dm >> Dn)sign ext.) -> Dm         // shift right arithmetic
 rot     Dn,Dm               (Dm rot Dn) -> Dm                   // rotate right
 
+mul.l   Dn,Dm               Dm * Dn -> Dm(low 32b)              // 32 bit mul
+mul.w   Dn,Dm               Dm * Dn -> Dm(low 16b)              // 16 bit mul   
+mul.b   Dn,Dm               Dm * Dn -> Dm(low 8b)               // 8 bit mul  
+div.l   Dn,Dm               Dm / Dn -> Dm(high 32b)             // 32 bit div   
+div.w   Dn,Dm               Dm / Dn -> Dm(high 16b)             // 16 bit div   
+div.b   Dn,Dm               Dm / Dn -> Dm(high 8b)              // 8 bit div
+                
+mulu.l  Dn,Dm               Dm * Dn -> Dm(low 32b)              // 32 bit unsigned mul
+mulu.w  Dn,Dm               Dm * Dn -> Dm(low 16b)              // 16 bit unsigned mul
+mulu.b  Dn,Dm               Dm * Dn -> Dm(low 8b)               // 8 bit unsigned mul
+divu.l  Dn,Dm               Dm / Dn -> Dm(high 32b)             // 32 bit unsigned div
+divu.w  Dn,Dm               Dm / Dn -> Dm(high 16b)             // 16 bit unsigned div
+divu.b  Dn,Dm               Dm / Dn -> Dm(high 8b)              // 8 bit unsigned div
+                
+mod.l   Dn,Dm               Dm % Dn -> Dm(low 32b)              // 32 bit remainder
+mod.w   Dn,Dm               Dm % Dn -> Dm(low 16b)              // 16 bit remainder
+mod.b   Dn,Dm               Dm % Dn -> Dm(low 8b)               // 8 bit remainder
+
 bclr    #imm5,Dm            0 -> Dm[imm]                        // bit clear
 bset    #imm5,Dm            1 -> Dm[imm]                        // bit set
 bnot    #imm5,Dm            ~Dm[imm] -> Dm[imm]                 // bit flip
@@ -87,8 +105,17 @@ andi    #imm8,D0            D0 & (zero extend)imm -> D0         // and imm.
 ori     #imm8,D0            D0 | (zero extend)imm -> D0         // or imm.
 xori    #imm8,D0            D0 ^ (zero extend)imm -> D0         // xor imm.
 tsti    #imm8,D0            (D0 & (zero extend)imm == 0) -> T   // test imm.
+mului   #imm8,D0            D0 * (zero ext.)imm -> D0
+divui   #imm8,D0            D0 * (zero ext.)imm -> D0
+modi    #imm8,D0            D0 % (zero ext.)imm -> D0
+
+muli    #imm8,D0            D0 * (sign ext.)imm -> D0
+divi    #imm8,D0            D0 / (sign ext.)imm -> D0
+
 bf      label               (T == 0) ? disp*2 + PC -> PC : nop  // branch false
 bt      label               (T == 1) ? disp*2 + PC -> PC : nop  // branch true
+
+
 
 ld.w    @(disp,PC),Dm       (disp*2 + PC) -> Dm                 // load 16-bit pc-relative
 ld.l    @(disp,PC),Dm       (disp*4 + PC) -> Dm                 // load 32-bit pc-relative      ***
@@ -104,18 +131,15 @@ bsr     label               PC -> A0, disp*2 + PC -> PC         // branch subrou
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**mulr  R0,Rn               R0 * Rn -> Rn 32 * 32 -> 32         // 320100nnnn10000000
-**muls.w    Rm,Rn           Signed, Rn * Rm -> MACL16 * 16 -> 32 bits0010nnnnmmmm1111
-**mulu.w    Rm,Rn           Unsigned, Rn * Rm -> MACL 16 * 16 -> 32 bits0010nnnnmmmm1110
-**div
-**divu
-**mod
 **lvbr  Dm                  Dm -> VBR                           // write VBR
 **svbr  Dm                  VBR -> Dm                           // read VBR
 **trap  #imm                imm*2 + VBR -> PC, PC + 2 -> A0     // trap
 
-
-
+muli    #imm8,D0
+mului   #imm8,D0
+divi    #imm8,D0
+divui   #imm8,D0
+modi    #imm8,D0
 
 
 

@@ -13,14 +13,15 @@ char *regnames[] = {
 };
 
 char *instnames[] = {
-    "nop",  "clrt", "sett", "nott", "rts",  "rte",  "intc", "ints",
-    "movt", "dt",   "braf", "bsrf", "jmp",  "jsr",  "sgz",  "sgzu",
-    "mov",  "ldb",  "ldw",  "stb",  "stw",  "add",  "addc", "addv",
-    "sub",  "subc", "subv", "and",  "tst",  "neg",  "negc", "not",
-    "or",   "xor",  "seq",  "sge",  "sgeu", "sgt",  "sgtu", "exts",
-    "extu", "sll",  "srl",  "sra",  "rot",  "bclr", "bset", "bnot",
-    "btst", "bf",   "bt",   "bra",  "bsr",  "ebreak", "exit",
-    "unknown"
+    "nop",      "clrt",     "sett",     "nott",     "rts",      "rte",      "intc",     "ints",
+    "movt",     "dt",       "braf",     "bsrf",     "jmp",      "jsr",      "sgz",      "sgzu",
+    "mov",      "ld.w",     "ld.b",     "st.w",     "st.b",     "add",      "addc",     "addv",
+    "sub",      "subc",     "subv",     "mul.w",    "mulu.w",   "mul.b",    "mulu.b",   "div.w",  
+    "divu.w",   "div.b",    "divu.b",   "mod.w",    "mod.b",    "and",      "tst",      "neg",  
+    "negc",     "not",      "or",       "xor",      "seq",      "sge",      "sgeu",     "sgt",  
+    "sgtu",     "exts",     "extu",     "sll",      "srl",      "sra",      "rot",      "bclr", 
+    "bset",     "bnot",     "btst",     "bf",       "bt",       "bra",      "bsr",      "ebreak", 
+    "exit",     "unknown"
 };
 
 int16_t reg[NUMREGS];

@@ -38,12 +38,13 @@ typedef enum instnum
 {
     nop,    clrt,   sett,   nott,   rts,    rte,    intc,   ints,
     movt,   dt,     braf,   bsrf,   jmp,    jsr,    sgz,    sgzu,
-    mov,    ldb,    ldw,    stb,    stw,    add,    addc,   addv,
-    sub,    subc,   subv,   and,    tst,    neg,    negc,   not,
-    or,     xor,    seq,    sge,    sgeu,   sgt,    sgtu,   exts,
-    extu,   sll,    srl,    sra,    rot,    bclr,   bset,   bnot,
-    btst,   bf,     bt,     bra,    bsr,    ebreak, exitprog,   
-    unknown
+    mov,    ldw,    ldb,    stw,    stb,    add,    addc,   addv,
+    sub,    subc,   subv,   mulw,   muluw,	mulb,	mulub,  divw, 
+	divuw,	divb,	divub,	modw,	modb,	and,    tst,    neg,   
+	negc,   not,    or,     xor,    seq,    sge,    sgeu,   sgt,    
+	sgtu,   exts,   extu,   sll,    srl,    sra,    rot,    bclr,   
+	bset,   bnot,   btst,   bf,     bt,     bra,    bsr,    ebreak, 
+	exitprog,   unknown
 } InstNum;
 
 typedef struct decodedInst

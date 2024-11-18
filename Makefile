@@ -10,12 +10,12 @@ help:
 	@echo "	all   - build everything"
 	@echo "	sim   - build ISA simulator"
 	@echo "	asm   - build assembler"
-	@echo "	vsim  - build verilated simulator"
+	@echo "	Vsim  - build verilated simulator"
 	@echo "	check - run ISA simulator tests"
 	@echo "	clean - clean all"
 
 # build simulator and tests
-all: sim asm vsim
+all: sim asm Vsim
 
 #
 # build the simulator, assembler, and verilated simulator
@@ -26,7 +26,7 @@ sim: FORCE
 asm: FORCE
 	@cd asm && $(MAKE) all
 	
-vsim: FORCE
+Vsim: FORCE
 	@cd hdl && $(MAKE) Vsim		
 
 check: FORCE

@@ -162,6 +162,36 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             tbit = !tbit;
             break;
             
+        case mulw:
+            f = a * b;
+            break;
+            
+        case divw:
+            if (b == 0)
+            {
+                // TODO: this will cause an exception later!!
+                fprintf(stderr, "DIVIDE BY ZERO\n");
+                f = 0;
+            }
+            else 
+            {
+                f = a / b;
+            }
+            break;
+            
+        case modw:
+            if (b == 0)
+            {
+                // TODO: this will cause an exception later!!
+                fprintf(stderr, "MOD BY ZERO\n");
+                f = 0;
+            }
+            else 
+            {
+                f = a % b;
+            }
+            break;
+            
         default:
             fprintf(stderr, "Bad ALU function: %d\n", func);
     }
