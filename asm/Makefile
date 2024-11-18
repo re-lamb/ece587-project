@@ -2,7 +2,7 @@
 # ECE 587 Fall 2024 - Final project
 # R.E. Lamb
 #
-# Makefile for the test suite
+# Makefile for the assembly language test suite
 #
 
 PROG=../sim/sim

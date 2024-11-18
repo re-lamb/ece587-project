@@ -1,69 +1,41 @@
-#include "isa.asm"
-; ALU tests
+; bit flippin tests
+; bset bclr bnot btst
 
-; test add/sub(i/c/v)
+#include "isa.asm"
+
     xor d0, d0              ; d0 = 0
     not d0, d1              ; d1 = -1
-    add d0, d0              ; 0 + 0 = 0
-    seq #0, d0              ; test
-    bf fail                 ; and branch
-    
-    movi #1, d3             ; d3 = 1               
-    add d0, d3              ; 0 + 1 = 1
-    seq #1, d3
-    bf fail
-    
-    add d1, d3              ; -1 + 1
-    seq #0, d3                           
-    bf fail   
-                  
-    mov d1, d2              ; d2 = -1
-    add d0, d2              ; -1 + 0
-    seq d1, d2        
-    bf fail
-    
-    ld.w pool, d2           ; d2 = 0x5555
-    ld.w pool + 2, d3       ; d3 = 0xaaaa
-    add d2, d3              ; d3 = -1   
-    seq d1, d3
-    bf fail
-    
-    ld.w pool + 4, d2       ; d2 = 0x4000
-    ld.w pool + 4, d3       ; d3 = 0x4000
-    ld.w pool + 6, d4       ; d4 = 0x8000 
-    add d2, d3              ; d3 = 0x8000
-    seq d3, d4
-    bf fail
-    
-    add d4, d4              ; 8000 + 8000 = 0
-    seq d0, d4
-    bf fail
-    
-    clrt
-    addc  d3, d3            ; 8000 + 8000 = 0 (10000), T = 1
-    bf fail
-    
-    addc d3, d3             ; 0 + 0 + T = 1, T = 0
-    bt fail
-    seq #1, d3              ; d3 == 1
-    bf fail
-    
-    ld.w pool + 8, d2       ; d2 = 15
-    ld.w pool + 10, d3      ; d3 = -8
-    mov d2, d4 
-    clrt
-    addc d3, d2             ; d2 = 7, T = 1
-    bf fail
-    
-    clrt
-    mov d4, d2              ; d2 = 15
-    addv d3, d2             ; d2 = 7, T = 0
-    bt fail
+	movi #1, d2				; d2 = 1
 	
-	neg d3, d3				; d3 = 8;
-	seq #8, d3
+	bset #0, d0				; d0 = 1
+    seq d0, d2              ; test
+    bf fail                 ; and branch
+	bclr #0, d0				; d0 = 0
+	seq #0, d0			
 	bf fail
-    
+	
+	mov d2, d3				; d3 = 1
+	slli #3, d3				; d3 = 8
+    bset #3, d4				; d4 = 8
+	add d3, d4				; d4 = 16
+	clrt		
+	btst #4, d4				; T = 0 -> 1 	
+	bf fail
+	sett
+	btst #5, d4				; T = 1 -> 0
+	bt fail
+	
+	bnot #5, d4				; d4 = 48
+	btst #5, d4				; T = 0 -> 1
+	bf fail
+	
+	clrt
+	mov d1, d3				; d3 = -1
+	bclr #0, d3				; d3 = -2
+	seq #-2, d3
+	bf fail
+	
+	
     nop
     nop
     nop

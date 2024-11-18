@@ -1,0 +1,15 @@
+--Mdir obj
+--cc
+-LDFLAGS 
+
++incdir+../../src/VeeRwolf/VeeR_EL2CoreComplex/include/
+-CFLAGS -I../../src/VeeRwolf/VeeR_EL2CoreComplex/include/
+
+../SimulationSources/dmi/dmi_jtag_to_core_sync.v
+
+--top-module sim
+--exe
+
+./sim.c
+
+-DViDBo=1

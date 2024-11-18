@@ -1,0 +1,31 @@
+#
+# ECE 587 Fall 2024 - Final project
+# R.E. Lamb
+#
+# Makefile for verilated simulator
+#
+
+TOP_MODULE = sim
+VC_FILE = sim.vc
+VERILATOR_OPTIONS = -Wno-fatal
+
+#Assume a local installation if VERILATOR_ROOT is set
+ifeq ($(VERILATOR_ROOT),)
+VERILATOR ?= verilator
+else
+VERILATOR ?= $(VERILATOR_ROOT)/bin/verilator
+endif
+
+# Make sim
+V$(TOP_MODULE): V$(TOP_MODULE).mk
+	$(MAKE) $(MAKE_OPTIONS) -f $<
+	
+# Generate makefile
+V$(TOP_MODULE).mk:
+	$(VERILATOR) -f $(VC_FILE) $(VERILATOR_OPTIONS)
+
+.PHONY : clean
+clean :
+	@rm -f V$(TOP_MODULE)*
+	@rm -f *.o
+	@rm -f *.d

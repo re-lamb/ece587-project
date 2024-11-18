@@ -7,6 +7,8 @@ rts                         A0 + 2 > PC                         // return from s
 rte                         EPC -> PC                           // return from exception
 ints                        1 -> int_en                         // enable interrupt
 intc                        0 -> int_en                         // disable interrupt
+ebreak                                                          // sim breakpoint
+exit                                                            // sim exit
 
 movt    Dm                  T -> Dm                             // move T to D-reg
 dt      Dm                  Dm - 1 -> Dm, (Dm == 0) -> T        // decrement and test
@@ -67,10 +69,10 @@ bclr    #imm5,Dm            0 -> Dm[imm]                        // bit clear
 bset    #imm5,Dm            1 -> Dm[imm]                        // bit set
 bnot    #imm5,Dm            ~Dm[imm] -> Dm[imm]                 // bit flip
 btst    #imm5,Dm            Dm[imm] -> T                        // bit test
-slli    #imm5,Dm            (Dn << imm) -> Dn                   // shift left logical imm.
-srli    #imm5,Dm            ((Dn << imm)zero ext.) -> Dn        // shift right logical imm.
-srai    #imm5,Dm            ((Dn >> imm)sign ext.) -> Dn        // shift right arithmetic imm.
-roti    #imm5,Dm            (Dn rot imm) -> Dn                  // rotate right imm
+slli    #imm5,Dm            (Dm << imm) -> Dm                   // shift left logical imm.
+srli    #imm5,Dm            ((Dm << imm)zero ext.) -> Dm        // shift right logical imm.
+srai    #imm5,Dm            ((Dm >> imm)sign ext.) -> Dm        // shift right arithmetic imm.
+roti    #imm5,Dm            (Dm rot imm) -> Dm                  // rotate right imm
 
 lda     @(disp,An),Am       (disp*2 + An) -> Am                 // load an address
 sta     Am,@(disp,An)       Am -> (disp*2 + An)                 // store an address

@@ -1,0 +1,11 @@
+--Mdir .
+--cc
+
+./sim.v
+./sim.c
+
+--top-module sim
+--exe
+
+
+
