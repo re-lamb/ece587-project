@@ -113,17 +113,9 @@
     srl		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0101
     sra		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0110
     rot		{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b0111
-	mul.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1000 
-	mul.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1001
-	div.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1011
-	div.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1100
-	mulu.b  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1110
-	mulu.w  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1111
-	divu.b  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0001
-	divu.w  {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0010					
-	mod.b   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0100 
-	mod.w   {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0101
-
+	mul   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1001
+	div   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1100				
+	mod   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0101
 }
 
 #ruledef
@@ -147,8 +139,6 @@
 	st.b	{m: DREG},@({d: s5},{n: AREG})   	=>	0b0101_1 @ m @ d[4:4] @ n @ d[3:0]
 	ld.w	@({d: s5},{n: AREG}),{m: DREG}   	=>	0b0110_0 @ m @ d[4:4] @ n @ d[3:0]
 	st.w	{m: DREG},@({d: s5},{n: AREG})   	=>	0b0110_1 @ m @ d[4:4] @ n @ d[3:0]
-	ld.l	@({d: s5},{n: AREG}),{m: DREG}   	=>	0b0111_0 @ m @ d[4:4] @ n @ d[3:0]
-	st.l	{m: DREG},@({d: s5},{n: DREG})   	=>	0b0111_1 @ m @ d[4:4] @ n @ d[3:0]
 }
 
 #ruledef

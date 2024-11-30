@@ -334,52 +334,38 @@ Instruction decode(uint16_t value)
                     this.func = rot;    // Dm rotate by Dn to Dm
                     break;
                     
-                case 40:
-                    this.func = mulb;  
-                    break;
+                //	case 40: mul.b
                     
                 case 41:
-                    this.func = mulw;  
+                    this.func = mul;  
                     break;
                 
                 // case 42: mul.l
                 
-                case 43:
-                    this.func = divb;  
-                    break;
+                // case 43: div.b
                     
                 case 44:
-                    this.func = divw;  
+                    this.func = divs;  
                     break;
                     
                 // case 45: div.l
                 
-                case 46:
-                    this.func = mulub;  
-                    break;
-                    
-                case 47:
-                    this.func = muluw;  
-                    break;
+                // case 46: mulu.b
+
+                // case 47: mulu.w
                     
                 // case 48: mulu.l
                 
-                case 49:
-                    this.func = divub;  
-                    break;
-                    
-                case 50:
-                    this.func = divuw;  
-                    break;
+                // case 49: divu.b
+
+                // case 50: divu.w
                     
                 // case 51: divu.l
                 
-                case 52:
-                    this.func = modb;  
-                    break;
+                // case 52: mod.b
                     
                 case 53:
-                    this.func = modw;  
+                    this.func = mod;  
                     break;
             }
             break;
@@ -497,26 +483,26 @@ Instruction decode(uint16_t value)
                     break;
                     
                 case 4:
-                    this.func = muluw;  // D0 * imm to D0
+                    this.func = mulu;  	// D0 * imm to D0
                     break;
                     
                 case 5:
-                    this.func = divuw;  // D0 / imm to D0
+                    this.func = divu;  	// D0 / imm to D0
                     break;
                     
                 case 6:
-                    this.func = modw;   // D0 % imm to D0
+                    this.func = mod;   	// D0 % imm to D0
                     break;
                     
                 // case 7: rsvd
                 
                 case 8:
-                    this.func = mulw;   // D0 * imm to D0
+                    this.func = mul;   // D0 * imm to D0
                     this.imm = ext;
                     break;
                     
                 case 9:
-                    this.func = divw;   // D0 / imm to D0
+                    this.func = divs;   // D0 / imm to D0
                     this.imm = ext;
                     break;
                 

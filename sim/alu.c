@@ -162,11 +162,11 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             tbit = !tbit;
             break;
             
-        case mulw:
+        case mul:
             f = a * b;
             break;
             
-        case divw:
+        case divs:
             if (b == 0)
             {
                 // TODO: this will cause an exception later!!
@@ -179,7 +179,7 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             }
             break;
             
-        case modw:
+        case mod:
             if (b == 0)
             {
                 // TODO: this will cause an exception later!!
@@ -189,6 +189,23 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             else 
             {
                 f = a % b;
+            }
+            break;
+		
+		case mulu:
+			f = (uint16_t)a * (uint16_t)b;
+			break;
+			
+		case divu:
+			 if (b == 0)
+            {
+                // TODO: this will cause an exception later!!
+                fprintf(stderr, "DIVIDE BY ZERO\n");
+                f = 0;
+            }
+            else 
+            {
+                f = (uint16_t)a / (uint16_t)b;
             }
             break;
             

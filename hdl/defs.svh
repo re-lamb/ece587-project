@@ -14,6 +14,54 @@
 `define ALEN    `XLEN
 `define MEMSZ   2 ** `ALEN
 
+`define REGS    16
+`define TREGS   16
+`define PREGS   32
+`define ARW     $clog2(`REGS)
+`define PRW     $clog2(`PREGS)
+`define TRW     $clog2(`TREGS)
+
+`define ROBSZ   16
+`define RBW     $clog2(`REGS)
+
+`define CTL     0
+`define ALU     1
+`define STQ     2
+`define LDQ     3
+`define BR      4
+`define EXC     5
+
+typedef struct packed
+{
+  logic valid;
+  logic done;
+  logic exc;
+  logic [`XLEN-1:0] inst;
+  logic [1:0] bp_state;
+  logic bp_hit;
+  logic [`ALEN-1:0] pc;
+  logic [`ALEN-1:0] npc;
+  logic [`XLEN-1:0] imm;
+  logic [`ARW-1:0] rs1;
+  logic [`PRW-1:0] p_rs1;
+  logic [`ARW-1:0] rs2;
+  logic [`PRW-1:0] p_rs2;
+  logic [`ARW-1:0] rd;
+  logic [`PRW-1:0] p_rd;
+  logic [`PRW-1:0] rd_stale;
+  logic [`TRW-1:0] t;
+  logic [`TRW-1:0] p_t;
+  logic [`TRW-1:0] t_stale;
+  logic [5:0] func;
+  logic [5:0] fu;
+  logic [`RBW-1:0] rob_num;
+  logic wb;
+  logic wbt;
+  logic read_rs1;
+  logic read_rs2;
+  logic read_t;
+} Inst_t;
+
 typedef struct packed
 {
   logic valid;
@@ -26,32 +74,13 @@ typedef struct packed
 
 typedef struct packed
 {
-  logic valid;
-  logic [`XLEN-1:0] inst;
-  logic [1:0] bp_state;
-  logic bp_hit;
-  logic [`ALEN-1:0] pc;
-  logic [`ALEN-1:0] npc;
-  logic [`XLEN-1:0] imm;
-  logic [3:0] rs1;
-  logic [4:0] p_rs1;
-  logic [3:0] rs2;
-  logic [4:0] p_rs2;
-  logic [3:0] rd;
-  logic [4:0] p_rd;
-  logic [3:0] rd_stale;
-  logic [3:0] t;
-  logic [3:0] p_t;
-  logic [3:0] t_stale;
-  logic [5:0] func;
-  logic [1:0] fu;
-  logic [3:0] rob_num;
-  logic wb;
-  logic wb_t;
-  logic read_rs1;
-  logic read_rs2;
-  logic read_t;
-} Inst_t;
+  logic en;
+  logic t_en;
+  logic exc;
+  logic [`RBW-1:0] idx;
+  logic [`PRW-1:0] tag;
+  logic [`TRW-1:0] t_tag;
+} Cdb_pkt_t;
 
 /*
 typedef struct packed
@@ -125,9 +154,7 @@ typedef enum logic [15:0] {
   SGT    = 'b0010_0???_1???_1110,
   SGTU   = 'b0010_0???_1???_1111,
   EXTSB  = 'b0010_1???_0???_0000,
-  EXTSW  = 'b0010_1???_0???_0001,
   EXTUB  = 'b0010_1???_0???_0010,
-  EXTUW  = 'b0010_1???_0???_0011,
   SLL    = 'b0010_1???_0???_0100,
   SRL    = 'b0010_1???_0???_0101,
   SRA    = 'b0010_1???_0???_0110,
@@ -161,7 +188,6 @@ typedef enum logic [15:0] {
   MULUI  = 'b1000_0100_????_????,
   DIVUI  = 'b1000_0101_????_????,
   MODI   = 'b1000_0110_????_????,
-  
   MULI   = 'b1000_1000_????_????,
   DIVI   = 'b1000_1001_????_????,
   

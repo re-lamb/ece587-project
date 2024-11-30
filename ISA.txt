@@ -1,145 +1,112 @@
 
-nop                         PC -> PC + 2                        // nop
-sett                        1 -> T                              // set T
-clrt                        0 -> T                              // clear T
-nott                        ~T -> T                             // invert T
-rts                         A0 + 2 > PC                         // return from subroutine
-rte                         EPC -> PC                           // return from exception
-ints                        1 -> int_en                         // enable interrupt
-intc                        0 -> int_en                         // disable interrupt
-ebreak                                                          // sim breakpoint
-exit                                                            // sim exit
+0000_0000_0000_0000		nop                     PC -> PC + 2                        // nop
+0000_0000_0000_0001		clrt                    0 -> T                              // clear T
+0000_0000_0000_0010		sett                    1 -> T                              // set T
+0000_0000_0000_0011		nott                    ~T -> T                             // invert T
+0000_0000_0000_0100		rts                     A0 + 2 > PC                         // return from subroutine
+0000_0000_0000_0101		rte                     EPC -> PC                           // return from exception
+0000_0000_0000_0110		intc                    0 -> int_en                         // disable interrupt
+0000_0000_0000_0111		ints                    1 -> int_en                         // enable interrupt
+0000_0000_0000_1000		ebreak                                                      // sim breakpoint
+0000_0000_0000_1001		exit                                                        // sim exit
 
-movt    Dm                  T -> Dm                             // move T to D-reg
-dt      Dm                  Dm - 1 -> Dm, (Dm == 0) -> T        // decrement and test
-dt      Am                  Am - 1 -> Am, (Am == 0) -> T        // decrement and test
-braf    Am                  Am + PC -> PC                       // branch far
-bsrf    Am                  PC -> A0, Am + PC -> PC             // branch subroutine far
-jmp     Am                  Am -> PC                            // jump
-jsr     Am                  PC -> A0, Am -> PC                  // jump subroutine
-sgz     Dm                  (Dm > 0) -> T                       // set greater than zero
-sgzu    Dm                  (Dm(unsigned) > 0) -> T             // set greater than zero unsigned
+0001_0mmm_0000_0000		movt    Dm              T -> Dm                             // move T to D-reg
+0001_0mmm_0000_0001		dt      Dm              Dm - 1 -> Dm, (Dm == 0) -> T        // decrement and test
+0001_0mmm_0000_0010		dt      Am              Am - 1 -> Am, (Am == 0) -> T        // decrement and test
+0001_0mmm_0000_0011		braf    Am              Am + PC -> PC                       // branch far
+0001_0mmm_0000_0100		bsrf    Am              PC -> A0, Am + PC -> PC             // branch subroutine far
+0001_0mmm_0000_0101		jmp     Am              Am -> PC                            // jump
+0001_0mmm_0000_0110		jsr     Am              PC -> A0, Am -> PC                  // jump subroutine
+0001_0mmm_0000_0111		sgz     Dm              (Dm > 0) -> T                       // set greater than zero
+0001_0mmm_0000_1000		sgzu    Dm              (Dm(unsigned) > 0) -> T             // set greater than zero unsigned
 
-mov     Dn,Dm               Dn -> Dm                            // reg-reg move (D->D)
-mova    Dn,Am               Dn -> Am                            // reg-reg move (D->A)
-mova    An,Am               An -> Am                            // reg-reg move (A->A)
-mov     An,Dm               An -> Dm                            // reg-reg move (A->D)
-ld.b    @An,Dm              (An) -> zero ext. -> Dm             // 8-bit zero ext. load
-ld.w    @An,Dm              (An) -> zero ext. -> Dm             // 16-bit zero ext. load
-ld.l    @An,Dm              (An) -> Dm                          // 32-bit load                      ***
-st.b    Dn,@Am              Dn -> (Am)                          // 8-bit store
-st.w    Dn,@Am              Dn -> (Am)                          // 16-bit store
-st.l    Dn,@Am              Dn -> (Am)                          // 32-bit store                     ***
+0010_0mmm_0nnn_0000		mov     Dn,Dm           Dn -> Dm                            // reg-reg move (D->D)
+0010_0mmm_0nnn_0001		mova    Dn,Am           Dn -> Am                            // reg-reg move (D->A)
+0010_0mmm_0nnn_0010		mova    An,Am           An -> Am                            // reg-reg move (A->A)
+0010_0mmm_0nnn_0011		mov     An,Dm           An -> Dm                            // reg-reg move (A->D)
+0010_0mmm_0nnn_0100		ld.b    @An,Dm          (An) -> zero ext. -> Dm             // 8-bit zero ext. load
+0010_0mmm_0nnn_0101		ld.w    @An,Dm          (An) -> zero ext. -> Dm             // 16-bit zero ext. load
+0010_0mmm_0nnn_0111		st.b    Dn,@Am          Dn -> (Am)                          // 8-bit store
+0010_0mmm_0nnn_1000		st.w    Dn,@Am          Dn -> (Am)                          // 16-bit store
 
-add     Dn,Dm               Dn + Dm -> Dm                       // D-D add
-addc    Dn,Dm               Dn + Dm + T -> Dm, c -> T           // add with carry
-addv    Dn,Dm               Dn + Dm -> Dm, v -> T               // add and set overflow
-adda    An,Am               An + Am -> Am                       // A-A add
-adda    Dn,Am               Dn + Am -> Am                       // D-A add
-sub     Dn,Dm               Dm - Dn -> Dm                       // sub
-subc    Dn,Dm               Dm - Dn - T -> Dm, c -> T           // sub with borrow
-subv    Dn,Dm               Dm - Dn -> Dn, v -> T               // sub and set underflow
-suba    An,Am               Am - An -> Am                       // A-A sub
-suba    Dn,Am               Am - Dn -> Am                       // D-A sub
+0010_0mmm_0nnn_1010		add     Dn,Dm           Dn + Dm -> Dm                       // D-D add
+0010_0mmm_0nnn_1011		addc    Dn,Dm           Dn + Dm + T -> Dm, c -> T           // add with carry
+0010_0mmm_0nnn_1100		addv    Dn,Dm           Dn + Dm -> Dm, v -> T               // add and set overflow
+0010_0mmm_0nnn_1101		adda    An,Am           An + Am -> Am                       // A-A add
+0010_0mmm_0nnn_1110		adda    Dn,Am           Dn + Am -> Am                       // D-A add
+0010_0mmm_0nnn_1111		sub     Dn,Dm           Dm - Dn -> Dm                       // sub
+0010_0mmm_1nnn_0000		subc    Dn,Dm           Dm - Dn - T -> Dm, c -> T           // sub with borrow
+0010_0mmm_1nnn_0001		subv    Dn,Dm           Dm - Dn -> Dn, v -> T               // sub and set underflow
+0010_0mmm_1nnn_0010		suba    An,Am           Am - An -> Am                       // A-A sub
+0010_0mmm_1nnn_0011		suba    Dn,Am           Am - Dn -> Am                       // D-A sub
+0010_0mmm_1nnn_0100		and     Dn,Dm           Dm & Dn -> Dm                       // and
+0010_0mmm_1nnn_0101		tst     Dn,Dm           (Dm & Dn == 0) -> T                 // D-D test
+0010_0mmm_1nnn_0110		neg     Dn,Dm           0 - Dn -> Dm                        // twos comp. negate
+0010_0mmm_1nnn_0111		negc    Dn,Dm           0 - Dn - T -> Dm, c -> T            // twos comp. negate with borrow
+0010_0mmm_1nnn_1000		not     Dn,Dm           ~Dn -> Dm                           // not
+0010_0mmm_1nnn_1001		or      Dn,Dm           Dm | Dn -> Dm                       // or
+0010_0mmm_1nnn_1010		xor     Dn,Dm           Dm ^ Dn -> Dm                       // xor
+0010_0mmm_1nnn_1011		seq     Dn,Dm           (Dm == Dn) -> T                     // set equal
+0010_0mmm_1nnn_1100		sge     Dn,Dm           (Dn >= Dm) -> T                     // set greater/equal
+0010_0mmm_1nnn_1101		sgeu    Dn,Dm           unsigned(Dn >= Dm) -> T             // set greater/equal unsigned
+0010_0mmm_1nnn_1110		sgt     Dn,Dm           (Dn > Dm) -> T                      // set greater
+0010_0mmm_1nnn_1111		sgtu    Dn,Dm           unsigned(Dn > Dm) -> T              // set greater unsigned
 
-and     Dn,Dm               Dm & Dn -> Dm                       // and
-tst     Dn,Dm               (Dm & Dn == 0) -> T                 // D-D test
-neg     Dn,Dm               0 - Dn -> Dm                        // twos comp. negate
-negc    Dn,Dm               0 - Dn - T -> Dm, c -> T            // twos comp. negate with borrow
-not     Dn,Dm               ~Dn -> Dm                           // not
-or      Dn,Dm               Dm | Dn -> Dm                       // or
-xor     Dn,Dm               Dm ^ Dn -> Dm                       // xor
-seq     Dn,Dm               (Dm == Dn) -> T                     // set equal
-sge     Dn,Dm               (Dn >= Dm) -> T                     // set greater/equal
-sgeu    Dn,Dm               unsigned(Dn >= Dm) -> T             // set greater/equal unsigned
-sgt     Dn,Dm               (Dn > Dm) -> T                      // set greater
-sgtu    Dn,Dm               unsigned(Dn > Dm) -> T              // set greater unsigned
+0010_1mmm_0nnn_0000		exts.b  Dn,Dm           Dn sign ext. from byte -> Dm        // sign ext. byte mov
+0010_1mmm_0nnn_0010		extu.b  Dn,Dm           Dn zero ext. from byte -> Dm        // zero ext. byte mov
+0010_1mmm_0nnn_0100		sll     Dn,Dm           (Dm << Dn) -> Dm                    // shift left logical
+0010_1mmm_0nnn_0101		srl     Dn,Dm           ((Dm << Dn)zero ext.) -> Dm         // shift right logical
+0010_1mmm_0nnn_0110		sra     Dn,Dm           ((Dm >> Dn)sign ext.) -> Dm         // shift right arithmetic
+0010_1mmm_0nnn_0111		rot     Dn,Dm           (Dm rot Dn) -> Dm                   // rotate right
 
-exts.b  Dn,Dm               Dn sign ext. from byte -> Dm        // sign ext. byte mov
-exts.w  Dn,Dm               Dn sign ext. from word -> Dm        // sign ext. word mov           ***
-extu.b  Dn,Dm               Dn zero ext. from byte -> Dm        // zero ext. byte mov
-extu.w  Dn,Dm               Dn zero ext. from word -> Dm        // zero ext. word mov           ***
-
-sll     Dn,Dm               (Dm << Dn) -> Dm                    // shift left logical
-srl     Dn,Dm               ((Dm << Dn)zero ext.) -> Dm         // shift right logical
-sra     Dn,Dm               ((Dm >> Dn)sign ext.) -> Dm         // shift right arithmetic
-rot     Dn,Dm               (Dm rot Dn) -> Dm                   // rotate right
-
-mul.l   Dn,Dm               Dm * Dn -> Dm(low 32b)              // 32 bit mul
-mul.w   Dn,Dm               Dm * Dn -> Dm(low 16b)              // 16 bit mul   
-mul.b   Dn,Dm               Dm * Dn -> Dm(low 8b)               // 8 bit mul  
-div.l   Dn,Dm               Dm / Dn -> Dm(high 32b)             // 32 bit div   
-div.w   Dn,Dm               Dm / Dn -> Dm(high 16b)             // 16 bit div   
-div.b   Dn,Dm               Dm / Dn -> Dm(high 8b)              // 8 bit div
-                
-mulu.l  Dn,Dm               Dm * Dn -> Dm(low 32b)              // 32 bit unsigned mul
-mulu.w  Dn,Dm               Dm * Dn -> Dm(low 16b)              // 16 bit unsigned mul
-mulu.b  Dn,Dm               Dm * Dn -> Dm(low 8b)               // 8 bit unsigned mul
-divu.l  Dn,Dm               Dm / Dn -> Dm(high 32b)             // 32 bit unsigned div
-divu.w  Dn,Dm               Dm / Dn -> Dm(high 16b)             // 16 bit unsigned div
-divu.b  Dn,Dm               Dm / Dn -> Dm(high 8b)              // 8 bit unsigned div
-                
-mod.l   Dn,Dm               Dm % Dn -> Dm(low 32b)              // 32 bit remainder
-mod.w   Dn,Dm               Dm % Dn -> Dm(low 16b)              // 16 bit remainder
-mod.b   Dn,Dm               Dm % Dn -> Dm(low 8b)               // 8 bit remainder
-
-bclr    #imm5,Dm            0 -> Dm[imm]                        // bit clear
-bset    #imm5,Dm            1 -> Dm[imm]                        // bit set
-bnot    #imm5,Dm            ~Dm[imm] -> Dm[imm]                 // bit flip
-btst    #imm5,Dm            Dm[imm] -> T                        // bit test
-slli    #imm5,Dm            (Dm << imm) -> Dm                   // shift left logical imm.
-srli    #imm5,Dm            ((Dm << imm)zero ext.) -> Dm        // shift right logical imm.
-srai    #imm5,Dm            ((Dm >> imm)sign ext.) -> Dm        // shift right arithmetic imm.
-roti    #imm5,Dm            (Dm rot imm) -> Dm                  // rotate right imm
-
-lda     @(disp,An),Am       (disp*2 + An) -> Am                 // load an address
-sta     Am,@(disp,An)       Am -> (disp*2 + An)                 // store an address
-ld.b    @(disp,An),Dm       (disp + An) -> zero ext. -> Dm      // 8-bit load w/ disp.
-st.b    Dm,@(disp,An)       Dm -> (disp + An)                   // 8-bit store w/ disp.
-ld.w    @(disp,An),Dm       (disp*2 + An) -> zero ext. -> Dm    // 16-bit load w/ disp.
-st.w    Dm,@(disp,An)       Dm -> (disp*2 + An)                 // 16-bit store w/ disp.
-ld.l    @(disp,An),Dm       (disp*4 + An) -> zero ext. -> Dm    // 32-bit load w/ disp.         ***
-st.l    Dm,@(disp,An)       Dn -> (disp*4 + Dn)                 // 32-bit store w/ disp.        ***
-
-andi    #imm8,D0            D0 & (zero extend)imm -> D0         // and imm.
-ori     #imm8,D0            D0 | (zero extend)imm -> D0         // or imm.
-xori    #imm8,D0            D0 ^ (zero extend)imm -> D0         // xor imm.
-tsti    #imm8,D0            (D0 & (zero extend)imm == 0) -> T   // test imm.
-mului   #imm8,D0            D0 * (zero ext.)imm -> D0
-divui   #imm8,D0            D0 * (zero ext.)imm -> D0
-modi    #imm8,D0            D0 % (zero ext.)imm -> D0
-
-muli    #imm8,D0            D0 * (sign ext.)imm -> D0
-divi    #imm8,D0            D0 / (sign ext.)imm -> D0
-
-bf      label               (T == 0) ? disp*2 + PC -> PC : nop  // branch false
-bt      label               (T == 1) ? disp*2 + PC -> PC : nop  // branch true
-
-
-
-ld.w    @(disp,PC),Dm       (disp*2 + PC) -> Dm                 // load 16-bit pc-relative
-ld.l    @(disp,PC),Dm       (disp*4 + PC) -> Dm                 // load 32-bit pc-relative      ***
-lda     @(disp,PC),Am       (disp*2 + PC) -> Am                 // load address pc-relative
-
-addi    #imm8,Dm            Dm + (sign ext.)imm -> Dm           // add imm. to Dm
-addi    #imm8,Am            Am + (sign ext.)imm -> Am           // add imm. to Am
-seq     #imm8,Dm            (Dm == imm(sign ext.)) -> T         // set equal imm.
-movi    #imm8,Dm            imm (zero ext.) -> Dm               // 8-bit imm
-
-bra     label               disp*2 + PC -> PC                   // branch
-bsr     label               PC -> A0, disp*2 + PC -> PC         // branch subroutine
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**lvbr  Dm                  Dm -> VBR                           // write VBR
-**svbr  Dm                  VBR -> Dm                           // read VBR
-**trap  #imm                imm*2 + VBR -> PC, PC + 2 -> A0     // trap
-
-muli    #imm8,D0
-mului   #imm8,D0
-divi    #imm8,D0
-divui   #imm8,D0
-modi    #imm8,D0
+0010_1mmm_0nnn_1001		mul   	Dn,Dm           Dm * Dn -> Dm(low 16b)              // 16 bit mul    
+0010_1mmm_0nnn_1100		div   	Dn,Dm           Dm / Dn -> Dm(high 16b)             // 16 bit div   
+0010_1mmm_1nnn_0101		mod   	Dn,Dm           Dm % Dn -> Dm(low 16b)              // 16 bit remainder	
+	
+0011_0mmm_s000_iiii		bclr    #imm5,Dm        0 -> Dm[imm]                        // bit clear
+0011_0mmm_s001_iiii		bset    #imm5,Dm        1 -> Dm[imm]                        // bit set
+0011_0mmm_s010_iiii		bnot    #imm5,Dm        ~Dm[imm] -> Dm[imm]                 // bit flip
+0011_0mmm_s011_iiii		btst    #imm5,Dm        Dm[imm] -> T                        // bit test
+0011_0mmm_s100_iiii		slli    #imm5,Dm        (Dm << imm) -> Dm                   // shift left logical imm.
+0011_0mmm_s101_iiii		srli    #imm5,Dm        ((Dm << imm)zero ext.) -> Dm        // shift right logical imm.
+0011_0mmm_s110_iiii		srai    #imm5,Dm        ((Dm >> imm)sign ext.) -> Dm        // shift right arithmetic imm.
+0011_0mmm_s111_iiii		roti    #imm5,Dm        (Dm rot imm) -> Dm                  // rotate right imm
+	
+0100_0mmm_snnn_iiii		lda     @(disp,An),Am   (disp*2 + An) -> Am                 // load an address
+0100_1mmm_snnn_iiii		sta     Am,@(disp,An)   Am -> (disp*2 + An)                 // store an address
+0101_0mmm_snnn_iiii		ld.b    @(disp,An),Dm   (disp + An) -> zero ext. -> Dm      // 8-bit load w/ disp.
+0101_1mmm_snnn_iiii		st.b    Dm,@(disp,An)   Dm -> (disp + An)                   // 8-bit store w/ disp.
+0110_0mmm_snnn_iiii		ld.w    @(disp,An),Dm   (disp*2 + An) -> zero ext. -> Dm    // 16-bit load w/ disp.
+0110_1mmm_snnn_iiii		st.w    Dm,@(disp,An)   Dm -> (disp*2 + An)                 // 16-bit store w/ disp.
+	
+1000_0000_siii_iiii		andi    #imm8,D0        D0 & (zero extend)imm -> D0         // and imm.
+1000_0001_siii_iiii		ori     #imm8,D0        D0 | (zero extend)imm -> D0         // or imm.
+1000_0010_siii_iiii		xori    #imm8,D0        D0 ^ (zero extend)imm -> D0         // xor imm.
+1000_0011_siii_iiii		tsti    #imm8,D0        (D0 & (zero extend)imm == 0) -> T   // test imm.
+1000_0100_siii_iiii		mului   #imm8,D0        D0 * (zero ext.)imm -> D0
+1000_0101_siii_iiii		divui   #imm8,D0        D0 * (zero ext.)imm -> D0
+1000_0110_siii_iiii		modi    #imm8,D0        D0 % (zero ext.)imm -> D0		
+1000_1000_siii_iiii		muli    #imm8,D0        D0 * (sign ext.)imm -> D0
+1000_1001_siii_iiii		divi    #imm8,D0        D0 / (sign ext.)imm -> D0
+		
+1000_1010_siii_iiii		bf      label           (T == 0) ? disp*2 + PC -> PC : nop  // branch false
+1000_1011_siii_iiii		bt      label           (T == 1) ? disp*2 + PC -> PC : nop  // branch true
+	
+1001_0mmm_siii_iiii		ld.w    @(disp,PC),Dm   (disp*2 + PC) -> Dm                 // load 16-bit pc-relative
+1010_0mmm_siii_iiii		lda     @(disp,PC),Am   (disp*2 + PC) -> Am                 // load address pc-relative
+		
+1011_0mmm_siii_iiii		addi    #imm8,Dm        Dm + (sign ext.)imm -> Dm           // add imm. to Dm
+1011_1mmm_siii_iiii		addi    #imm8,Am        Am + (sign ext.)imm -> Am           // add imm. to Am
+1100_0mmm_siii_iiii		seq     #imm8,Dm        (Dm == imm(sign ext.)) -> T         // set equal imm.
+1100_1mmm_siii_iiii		movi    #imm8,Dm        imm (zero ext.) -> Dm               // 8-bit imm
+	
+1110_siii_iiii_iiii		bra     label           disp*2 + PC -> PC                   // branch
+1111_siii_iiii_iiii		bsr     label           PC -> A0, disp*2 + PC -> PC         // branch subroutine
+	
+						**lvbr  Dm              Dm -> VBR                           // write VBR
+						**svbr  Dm              VBR -> Dm                           // read VBR
+						**trap  #imm            imm*2 + VBR -> PC, PC + 2 -> A0     // trap
+	
 
 
 

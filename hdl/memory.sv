@@ -48,6 +48,7 @@ module memory
       mem[wr_addr_0 + 1] <= wr_data_0[15:8];
   end
   
+  // word reads, little-endian
   assign rd_data_0 = { mem[rd_addr_0 + 1], mem[rd_addr_0] };
   assign rd_data_1 = { mem[rd_addr_1 + 1], mem[rd_addr_1] };
   assign rd_data_2 = { mem[rd_addr_2 + 1], mem[rd_addr_2] };

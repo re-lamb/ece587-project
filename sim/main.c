@@ -17,7 +17,7 @@
 #include "defs.h"
 #include <termios.h>
 
-#define MAXLINELEN  40
+#define MAXLINELEN  60
 
 uint8_t *mem;
 
@@ -41,7 +41,7 @@ uint8_t *loadfile(FILE *fp)
     char *line;
     char buf[MAXLINELEN];
     char junk[MAXLINELEN];
-    
+
     uint addr, low, hi, value;
     int lc = 0;
 
@@ -56,13 +56,20 @@ uint8_t *loadfile(FILE *fp)
     while ((line = fgets(buf, MAXLINELEN, fp)) != NULL)
     {
         lc++;
-        
-        if (sscanf(line, " %s | %x | %x %x ; %s", junk, &addr, &hi, &low, junk) != 5)
+        int len = strlen(line);
+
+        if (sscanf(line, " %s | %x | %x %x ; %s\n", junk, &addr, &hi, &low, junk) != 5)
         {
+            // ignore the header line:  "outp | addr | data (base 16)"
+            // ignore labels:           "6c:0 |   6c |       ; fail:" (ends in ':')
+            // and don't complain about blank lines.
+            if (len <= 1 || buf[len - 2] == ':' || strncmp(buf, " outp", 5) == 0) continue;
+
+            // whine about everything else
             fprintf(stderr, "Bad input at line %d ignored: '%s'\n", lc, line);
             continue;
         }
-        
+
         // make sure the address is in range
         if (addr > MEMSZ-1)
         {
