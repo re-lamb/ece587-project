@@ -19,7 +19,7 @@
 #define NUMREGS     16
 
 #define XLEN        16
-#define SIGNBIT(x)  (1 << (x))  
+#define SIGNBIT(x)  (1 << (x))
 #define AREG(x)     (x + 8)
 
 #define RA          8
@@ -39,11 +39,11 @@ typedef enum instnum
     nop,    clrt,   sett,   nott,   rts,    rte,    intc,   ints,
     movt,   dt,     braf,   bsrf,   jmp,    jsr,    sgz,    sgzu,
     mov,    ldw,    ldb,    stw,    stb,    add,    addc,   addv,
-    sub,    subc,   subv,   and,    tst,    neg,   	negc,   not,
-	or,     xor,    seq,    sge,    sgeu,   sgt,    sgtu,   exts,   
-	extu,   sll,    srl,    sra,    rot,    mul,	mulu,	divs,	
-	divu,	mod,	bclr,   bset,   bnot,   btst,   bf,     bt,     
-	bra,    bsr,    ebreak, exitprog,   unknown
+    sub,    subc,   subv,   and,    tst,    neg,    negc,   not,
+    or,     xor,    seq,    sge,    sgeu,   sgt,    sgtu,   exts,
+    extu,   sll,    srl,    sra,    rot,    mul,    mulu,   divs,
+    divu,   mod,    bclr,   bset,   bnot,   btst,   bf,     bt,
+    bra,    bsr,    ebreak, exitprog,   unknown
 } InstNum;
 
 typedef struct decodedInst
@@ -59,6 +59,16 @@ typedef struct decodedInst
     bool wbr;
 } Instruction;
 
+typedef enum exUnit { illegal, alu, muldiv, bru, lsu, pseudo } ExecUnit;
+typedef enum brResult { condTaken, condNotTaken, uncond } BranchResult;
+
+typedef struct statCounters
+{
+    uint count;         // total instructions executed
+    uint byType[6];     // by execution unit
+    uint brType[3];     // branch type, direction
+} Statistics;
+
 extern int debug;
 extern int verbose;
 extern int breakpoint;
@@ -68,6 +78,7 @@ extern uint8_t *mem;
 extern char *instnames[];
 extern char *regnames[];
 extern int16_t tbit;
+extern Statistics stats;
 
 int16_t memload(uint16_t addr, uint8_t size);
 void memstore(uint16_t addr, uint8_t size, int16_t value);
