@@ -5,7 +5,7 @@
 
     xor d0, d0              ; d0 = 0
     not d0, d1              ; d1 = -1
-	movi #1, d2				; d2 = 1
+	mov #1, d2				; d2 = 1
 	
 	bset #0, d0				; d0 = 1
     seq d0, d2              ; test
@@ -15,7 +15,7 @@
 	bf fail
 	
 	mov d2, d3				; d3 = 1
-	slli #3, d3				; d3 = 8
+	sll #3, d3				; d3 = 8
     bset #3, d4				; d4 = 8
 	add d3, d4				; d4 = 16
 	clrt		
@@ -41,7 +41,7 @@
     exit
     
 fail:
-    movi #0, d0
+    mov #0, d0
     not d0, d0
     exit                    ; exit -1 on fail
     

@@ -94,6 +94,7 @@ module decode(
   assign issue_pkt[0].rs2      = decode_inst[0].rs2;                            // a_rs2
   assign issue_pkt[0].rd       = decode_inst[0].rd;                             // a_rd
   assign issue_pkt[0].imm      = decode_inst[0].imm;                            // immediate
+  assign issue_pkt[0].use_imm  = decode_inst[0].use_imm;                        // i-type
   assign issue_pkt[0].wb       = decode_inst[0].wb;                             // writeback flag
   assign issue_pkt[0].wb_t     = decode_inst[0].wb_t;                           // writeback t flag
   assign issue_pkt[0].read_rs1 = decode_inst[0].read_rs1;                       // read rs1
@@ -121,6 +122,7 @@ module decode(
   assign issue_pkt[1].rs2      = decode_inst[1].rs2;
   assign issue_pkt[1].rd       = decode_inst[1].rd;
   assign issue_pkt[1].imm      = decode_inst[1].imm;
+  assign issue_pkt[1].use_imm  = decode_inst[1].use_imm;
   assign issue_pkt[1].wb       = decode_inst[1].wb;
   assign issue_pkt[1].wb_t     = decode_inst[1].wb_t;
   assign issue_pkt[1].read_rs1 = decode_inst[1].read_rs1;
@@ -144,7 +146,7 @@ module inst_decoder(
 
   always_comb begin
     inst_o = '0;
-
+    
     // rs1
     case (inst_i) inside
       DTA, BRAF, BSRF, JMP, JSR, STB, STW, ADDA, ADDDA, SUBA, SUBDA, STWD:
@@ -187,29 +189,38 @@ module inst_decoder(
     // imm
     case (inst_i[15:12]) inside
       'b0011, 
-      'b01??:
+      'b01??: begin
         inst_o.imm = {{12{inst_i[7]}}, inst_i[3:0]};    // 5-bit sign-extended
-        
-      'b1000:                                           // bf/bt sign-extend
+      end  
+      'b1000: begin                                     // bf/bt sign-extend
         inst_o.imm = (inst_i == BF | inst_i == BT) ? {{9{inst_i[7]}}, inst_i[6:0]} : {8'b0, inst_i[7:0]} ;
-
+      end
       'b1001, 'b1010, 'b1011,
-      'b1100:
+      'b1100: begin
         inst_o.imm = {{9{inst_i[7]}}, inst_i[6:0]};     // 8-bit sign-extended
-        
-      'b111?:
+      end  
+      'b111?: begin
       	inst_o.imm = {{5{inst_i[11]}}, inst_i[10:0]};   // 12-bit sign-extended
-        
+      end
       default:
         inst_o.imm = '0;
+    endcase
+    
+    // use_imm
+    case (inst_i) inside
+      BCLRI, BSETI, BNOTI, BTSTI, SLLI, SRLI, SRAI, ROTI, ANDI, ORI, XORI, TSTI, MULUI, DIVUI, MODI, 
+      MULI, DIVI, ADDI, ADDIA, SEQI, MOVI:
+        inst_o.use_imm = 1;
+      default:
+        inst_o.use_imm = 0;
     endcase
     
     // read_rs1
     case (inst_i) inside
       DTD, DTA, BRAF, BSRF, JMP, JSR, SGZ, SGZU, STB, STW, ADD, ADDC, ADDV, ADDA, ADDDA, SUB,
       SUBC, SUBV, SUBA, SUBDA, AND, TST, OR, XOR, SEQ, SGE, SGEU, SGT, SGTU, SLL, SRL, SRA, ROT, 
-      MUL, DIV, MOD, BCLR, BSET, BNOT, BTST, SLLI, SRLI, SRAI, ROTI, STA, STBD, STWD, ANDI, ORI, 
-      XORI, ADDI, ADDIA, SEQI:
+      MUL, DIV, MOD, BCLR, BSET, BNOT, BTST, BCLRI, BSETI, BNOTI, BTSTI, SLLI, SRLI, SRAI, ROTI, 
+      STA, STBD, STWD, ANDI, ORI, XORI, ADDI, ADDIA, SEQI:
         inst_o.read_rs1 = 1;
         
       default: 
@@ -220,7 +231,8 @@ module inst_decoder(
     case (inst_i) inside
       MOV, MOVDA, MOVA, MOVAD, LDB, LDW, STB, STW, ADD, ADDC, ADDV, ADDA, ADDDA, SUB,
       SUBC, SUBV, SUBA, SUBDA, AND, TST, NEG, NEGC, NOT, OR, XOR, SEQ, SGE, SGEU, SGT, SGTU,
-      EXTSB, EXTUB, SLL, SRL, SRA, ROT, MUL, DIV, MOD, LDA, STA, LDBD, STBD, LDWD, STWD:
+      EXTSB, EXTUB, SLL, SRL, SRA, ROT, MUL, DIV, MOD, BCLR, BSET, BNOT, BTST, LDA, STA, LDBD, 
+      STBD, LDWD, STWD:
         inst_o.read_rs2 = 1;
         
       default: 
@@ -231,15 +243,15 @@ module inst_decoder(
     case (inst_i) inside
       MOVT, DTD, DTA, BSRF, JSR, MOV, MOVDA, MOVA, MOVAD, LDB, LDW, ADD, ADDC, ADDV, ADDA, ADDDA, 
       SUB, SUBC, SUBV, SUBA, SUBDA, AND, NEG, NEGC, NOT, OR, XOR, EXTSB, EXTUB, SLL, SRL, SRA, ROT, 
-      MUL, DIV, MOD, BCLR, BSET, BNOT, SLLI, SRLI, SRAI, ROTI, LDA, LDBD, LDWD, ANDI, ORI, XORI, 
-      MULUI, DIVUI, MODI, MULI, DIVI, LDWP, LDAP, ADDI, ADDIA, MOVI, BSR:
+      MUL, DIV, MOD, BCLR, BSET, BNOT, BCLRI, BSETI, BNOTI, SLLI, SRLI, SRAI, ROTI, LDA, LDBD, LDWD, 
+      ANDI, ORI, XORI, MULUI, DIVUI, MODI, MULI, DIVI, LDWP, LDAP, ADDI, ADDIA, MOVI, BSR:
         inst_o.wb = 1;
         
       default:
         inst_o.wb = 0;
     endcase
     
-    //read_t;
+    // read_t
     case (inst_i) inside
       NOTT, MOVT, ADDC, SUBC, NEGC, BF, BT:
         inst_o.read_t = 1;
@@ -251,7 +263,7 @@ module inst_decoder(
     // wb_t
     case (inst_i) inside
       CLRT, SETT, NOTT, DTD, DTA, SGZ, SGZU, ADDC, ADDV, SUBC, SUBV, TST, NEGC, SEQ, SGE, SGEU, 
-      SGT, SGTU, BTST, TSTI, SEQI:
+      SGT, SGTU, BTST, BTSTI, TSTI, SEQI:
         inst_o.wb_t = 1;
         
       default:
@@ -262,8 +274,8 @@ module inst_decoder(
     case (inst_i) inside
       CLRT, SETT, NOTT, MOVT, DTD, DTA, SGZ, SGZU, MOV, MOVDA, MOVA, MOVAD, ADD, ADDC, ADDV, 
       ADDA, ADDDA, SUB, SUBC, SUBV, SUBA, SUBDA, AND, TST, NEG, NEGC, NOT, OR, XOR, SEQ, SGE,   
-      SGEU, SGT, SGTU, EXTSB, EXTUB, SLL, SRL, SRA, ROT, BCLR, BSET, BNOT, BTST, SLLI, SRLI,  
-      SRAI, ROTI, ADDI, ADDIA, SEQI, MOVI, ANDI, ORI, XORI, TSTI: 
+      SGEU, SGT, SGTU, EXTSB, EXTUB, SLL, SRL, SRA, ROT, BCLR, BSET, BNOT, BTST, BCLRI, BSETI, 
+      BNOTI, BTSTI, SLLI, SRLI, SRAI, ROTI, ADDI, ADDIA, SEQI, MOVI, ANDI, ORI, XORI, TSTI: 
         inst_o.fu = `ALU;
       
       MUL, DIV, MOD, MULUI, DIVUI, MODI, MULI, DIVI:
@@ -283,12 +295,6 @@ module inst_decoder(
         
       default:
         inst_o.fu = `EXC;
-    endcase
-    
-    //func;
-    case (inst_i) inside
-    
-      default:
     endcase
   end
 

@@ -8,7 +8,7 @@
     seq #0, d0              ; test
     bf fail                 ; and branch
     
-    movi #1, d3             ; d3 = 1               
+    mov #1, d3             ; d3 = 1               
     add d0, d3              ; 0 + 1 = 1
     seq #1, d3
     bf fail
@@ -70,7 +70,7 @@
     exit
     
 fail:
-    movi #0, d0
+    mov #0, d0
     not d0, d0
     exit                    ; exit -1 on fail
     

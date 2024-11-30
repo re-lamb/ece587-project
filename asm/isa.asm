@@ -116,6 +116,10 @@
 	mul   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1001
 	div   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1100				
 	mod   	{n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b0101
+	bclr	{n: DREG},{m: DREG}		=>	0b0010_1 @ m @ 0b0 @ n @ 0b1000
+	bset    {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1001
+	bnot    {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b0 @ n @ 0b1010
+	btst    {n: DREG},{m: DREG}     =>	0b0010_1 @ m @ 0b1 @ n @ 0b1011
 }
 
 #ruledef
@@ -124,10 +128,10 @@
     bset 	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b001 @ imm[3:0]
     bnot	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b010 @ imm[3:0]
     btst 	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b011 @ imm[3:0]
-    slli	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b100 @ imm[3:0]
-    srli	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b101 @ imm[3:0]
-    srai	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b110 @ imm[3:0]
-    roti	#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b111 @ imm[3:0]
+    sll		#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b100 @ imm[3:0]
+    srl		#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b101 @ imm[3:0]
+    sra		#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b110 @ imm[3:0]
+    rot		#{imm: u5},{m: DREG}    =>	0b0011_0 @ m @ imm[4:4] @ 0b111 @ imm[3:0]
 }
 
 
@@ -143,15 +147,15 @@
 
 #ruledef
 {
-    andi	#{imm: u8},d0	=> 0b1000_0000 @ imm
-	ori		#{imm: u8},d0   => 0b1000_0001 @ imm
-	xori	#{imm: u8},d0   => 0b1000_0010 @ imm
-	tsti	#{imm: u8},d0   => 0b1000_0011 @ imm
-	mului	#{imm: u8},d0   => 0b1000_0100 @ imm
-	divui	#{imm: u8},d0   => 0b1000_0101 @ imm
-	modi 	#{imm: u8},d0   => 0b1000_0110 @ imm	
-	muli	#{imm: i8},d0   => 0b1000_1000 @ imm
-	divi 	#{imm: i8},d0   => 0b1000_1001 @ imm
+    and		#{imm: u8},d0	=> 0b1000_0000 @ imm
+	or		#{imm: u8},d0   => 0b1000_0001 @ imm
+	xor		#{imm: u8},d0   => 0b1000_0010 @ imm
+	tst		#{imm: u8},d0   => 0b1000_0011 @ imm
+	mulu	#{imm: u8},d0   => 0b1000_0100 @ imm
+	divu	#{imm: u8},d0   => 0b1000_0101 @ imm
+	mod 	#{imm: u8},d0   => 0b1000_0110 @ imm	
+	mul		#{imm: i8},d0   => 0b1000_1000 @ imm
+	div 	#{imm: i8},d0   => 0b1000_1001 @ imm
 	bf		{label: disp8}  => 0b1000_1010 @ label
 	bt		{label: disp8}	=> 0b1000_1011 @ label
 }
@@ -160,10 +164,10 @@
 {
 	ld.w	@({d: s8},PC),{m: DREG}         => 0b1001_0 @ m @ d
 	lda 	@({d: s8},PC),{m: AREG}	        => 0b1010_0 @ m @ d 
-	addi	#{imm: i8},{m: DREG}			=> 0b1011_0 @ m @ imm
-	addi	#{imm: i8},{m: AREG}			=> 0b1011_1 @ m @ imm
+	add		#{imm: i8},{m: DREG}			=> 0b1011_0 @ m @ imm
+	add		#{imm: i8},{m: AREG}			=> 0b1011_1 @ m @ imm
 	seq		#{imm: i8},{m: DREG}			=> 0b1100_0 @ m @ imm
-	movi 	#{imm: i8},{m: DREG}			=> 0b1100_1 @ m @ imm
+	mov 	#{imm: i8},{m: DREG}			=> 0b1100_1 @ m @ imm
 }
 
 #ruledef

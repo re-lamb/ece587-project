@@ -62,11 +62,16 @@
 0010_1mmm_0nnn_1001		mul   	Dn,Dm           Dm * Dn -> Dm(low 16b)              // 16 bit mul    
 0010_1mmm_0nnn_1100		div   	Dn,Dm           Dm / Dn -> Dm(high 16b)             // 16 bit div   
 0010_1mmm_1nnn_0101		mod   	Dn,Dm           Dm % Dn -> Dm(low 16b)              // 16 bit remainder	
+
+0010_1mmm_1nnn_1000		bclr    Dn,Dm		0 -> Dm[Dn]                         // bit clear
+0010_1mmm_1nnn_1001		bset    Dn,Dm		1 -> Dm[Dn]                         // bit set
+0010_1mmm_1nnn_1010		bnot    Dn,Dm		~Dm[Dn] -> Dm[Dn]                   // bit flip
+0010_1mmm_1nnn_1011		btst    Dn,Dm		Dm[Dn] -> T                         // bit test
 	
-0011_0mmm_s000_iiii		bclr    #imm5,Dm        0 -> Dm[imm]                        // bit clear
-0011_0mmm_s001_iiii		bset    #imm5,Dm        1 -> Dm[imm]                        // bit set
-0011_0mmm_s010_iiii		bnot    #imm5,Dm        ~Dm[imm] -> Dm[imm]                 // bit flip
-0011_0mmm_s011_iiii		btst    #imm5,Dm        Dm[imm] -> T                        // bit test
+0011_0mmm_s000_iiii		bclri   #imm5,Dm        0 -> Dm[imm]                        // bit clear
+0011_0mmm_s001_iiii		bseti   #imm5,Dm        1 -> Dm[imm]                        // bit set
+0011_0mmm_s010_iiii		bnoti   #imm5,Dm        ~Dm[imm] -> Dm[imm]                 // bit flip
+0011_0mmm_s011_iiii		btsti   #imm5,Dm        Dm[imm] -> T                        // bit test
 0011_0mmm_s100_iiii		slli    #imm5,Dm        (Dm << imm) -> Dm                   // shift left logical imm.
 0011_0mmm_s101_iiii		srli    #imm5,Dm        ((Dm << imm)zero ext.) -> Dm        // shift right logical imm.
 0011_0mmm_s110_iiii		srai    #imm5,Dm        ((Dm >> imm)sign ext.) -> Dm        // shift right arithmetic imm.

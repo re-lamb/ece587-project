@@ -99,6 +99,20 @@ typedef struct packed
 } Id_is_pkt_t;
 */
 
+typedef enum logic [:0] {
+  op_add,
+  op_addc,
+  op_addv,
+  op_sub,
+  op_subc,
+  op_subv,
+  op_passb,    // movs
+  op_and,
+  op_not,
+  op_or,
+  op_xor
+} Alu_op_t;
+
 typedef enum logic [15:0] {
   NOP    = 'b0000_0000_0000_0000,
   CLRT   = 'b0000_0000_0000_0001,

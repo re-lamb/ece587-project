@@ -102,6 +102,7 @@ module reorder(
       end
       else if (rob_cnt > 0) begin
         entry[rob_head].valid <= `FALSE;
+        rob_head <= rob_head - 1;
         rob_cnt <= '0;
         rollback <= '0;
       end
