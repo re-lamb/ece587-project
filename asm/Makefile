@@ -20,15 +20,15 @@ all: $(TESTOBJ)
 
 # tests return r0 as exit code 
 check: $(TESTS)
-	@for f in $(TESTS); do					\
-		echo "";							\
+	@for f in $(TESTS); do				\
+		echo "";				\
 		echo -n "Running test $$f...";		\
 		$(PROG) -d $$f >> test.log 2>&1;	\
-		if [ $$? -eq 0 ]; then				\
-			echo "PASS";					\
-		else								\
-			echo "FAIL";					\
-		fi									\
+		if [ $$? -eq 0 ]; then			\
+			echo "PASS";			\
+		else					\
+			echo "FAIL";			\
+		fi					\
 	done
 
 clean:

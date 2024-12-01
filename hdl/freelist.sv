@@ -64,6 +64,14 @@ module freelist(
       end
     end
   end
+  
+  assign freelist_rdy[0] = rdy[0];
+  assign next_free[0] = next_free_idx[0];
+
+  // if it's the last free and inst0 doesn't want it, offer it to inst1
+  assign freelist_rdy[1] = (rdy[0] && !freelist_en[0] && !rdy[1]) ? rdy[0] : rdy[1];
+  assign next_free[1] = (rdy[0] && !freelist_en[0] && !rdy[1]) ? next_free_idx[0] : next_free_idx[1];
+  
     
   logic [1:0][3:0] next_free_t_idx;
   logic [1:0][15:0] bitmap_t;

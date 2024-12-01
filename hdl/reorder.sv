@@ -54,7 +54,9 @@ module reorder(
   assign rollback_start = (entry[rob_tail].valid && entry[rob_tail].exc) |
                           (entry[rob_tail + 1].valid && entry[rob_tail + 1].exc);
                           
+  // TODO: placeholder 
   assign recovery_en = rollback_start;
+  assign recovery_addr = (entry[rob_tail].valid && entry[rob_tail].exc) ? entry[rob_tail].npc : entry[rob_tail + 1].npc;
  
   // return reg to free list on retirement/rollback
   assign retire_en[0] = (rollback) ? (entry[rob_head].valid && entry[rob_head].wb) : 
@@ -91,6 +93,10 @@ module reorder(
       rob_cnt  <= '0;
       rollback <= '0;
     end
+    if (entry[rob_tail].inst == EXIT | entry[rob_tail + 1].inst == EXIT) begin
+      $display("exit encountered at %x", entry[rob_tail].pc);
+      $finish;
+    end 
     else if (rollback) begin      // rebuild state on mispredict/exception
       if (rob_cnt >= 2) begin
         entry[rob_head].valid <= `FALSE;
