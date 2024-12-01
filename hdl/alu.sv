@@ -5,14 +5,17 @@ module exec_int(
   input Inst_t issue_inst,
   input [`XLEN-1:0] reg_a, 
   input [`XLEN-1:0] reg_b,
-  input reg_t;
+  input reg_t,
   output Cdb_pkt_t cdb_pkt,
-  output [`XLEN-1:0] result,
-  output result_en
+  output logic [`XLEN-1:0] result,
+  output logic result_en,
+  output logic result_t,
+  output logic result_t_en
 );
   Inst_t inst;
-  logic [`XLEN-1:0] op_a, op_b;
-  
+  logic [`XLEN-1:0] op_a, op_b, f;
+  logic [4:0] func;
+  logic op_t, co, z, v, n;
   
   always_ff @(posedge clk) begin
     if (rst || recovery_en) 
@@ -22,82 +25,168 @@ module exec_int(
     end
   end
   
+  alu alu(
+    .func(func),
+    .a(op_a),
+    .b(op_b),
+    .ci(op_t),
+    .f(f),
+    .co(co),
+    .v(v),
+    .z(z),
+    .n(n)
+  );
+  
   always_comb begin
     op_a = reg_a;
     op_b = (inst.use_imm) ? inst.imm : reg_b;
     op_t = (inst.read_t) ? reg_t : '0;
     cdb_pkt.en = (recovery_en) ? '0 : (inst.valid && inst.wb);
     cdb_pkt.t_en = (recovery_en) ? '0 : (inst.valid && inst.wbt);
-    cdb_pkt.idx = inst.idx;
+    cdb_pkt.idx = inst.rob_num;
     cdb_pkt.tag = inst.p_rd;
     cdb_pkt.t_tag = inst.p_t;
-    cdb_pkt.exc = (inst.valid) ? `TRUE : `FALSE;
     
-    case (inst.inst) begin
-      CLRT: begin
-        func = 
-        a,
-        b,
-        t_in,
-        f,
-        t_out,
+    result = f;
+    result_t = op_t;
+    result_en = cdb_pkt.en;
+    result_t_en = cdb_pkt.t_en;
+    
+    case (inst.inst)
+      CLRT: result_t = '0; 
+      SETT: result_t = '1;
+      NOTT: result_t = ~reg_t;
+      MOVT: result = reg_t;
+      DTD, DTA: begin
+        func = op_sub;
+        result_t = z;
       end
-      SETT: 
-      NOTT:
-      MOVT:
-      DTD: 
-      DTA: 
-      SGZ:
-      SGZU:
-      MOV, MOVDA, MOVA, MOVAD, ADD, ADDC, ADDV, 
-      ADDA, ADDDA, SUB, SUBC, SUBV, SUBA, SUBDA, AND, TST, NEG, NEGC, NOT, OR, XOR, SEQ, SGE,   
-      SGEU, SGT, SGTU, EXTSB, EXTUB, SLL, SRL, SRA, ROT, BCLR, BSET, BNOT, BTST, BCLRI, BSETI, 
-      BNOTI, BTSTI, SLLI, SRLI, SRAI, ROTI, ADDI, ADDIA, SEQI, MOVI, ANDI, ORI, XORI, TSTI: 
-        inst_o.fu = `ALU;
-      
-      MUL, DIV, MOD, MULUI, DIVUI, MODI, MULI, DIVI:
-        inst_o.fu = `ALU;
-      
+      SGZ: begin
+        func = op_add;
+        op_b = '0;
+        result_t = !(z | n);
+      end
+      SGZU: begin
+        func = op_add;
+        op_b = '0;
+        result_t = !z;
+      end
+      MOV, MOVDA, MOVA, MOVAD, MOVI: func = op_passb;
+      ADD, ADDA, ADDDA, ADDI, ADDIA: func = op_add;
+      ADDC: begin 
+        func = op_add; 
+        result_t = co; 
+      end
+      ADDV: begin
+        func = op_add;
+        result_t = v;
+      end
+      SUB, SUBA, SUBDA:
+        func = op_sub;
+      SUBC: begin
+        func = op_sub;
+        result_t = co;
+      end
+      SUBV: begin
+        func = op_sub;
+        result_t = v;
+      end      
+      AND, ANDI: func = op_and;
+      TST, TSTI: begin
+        func = op_and;
+        result_t = z;
+      end
+      NEG: begin
+        func = op_sub;
+        op_a = 0;
+      end
+      NEGC: begin
+        func = op_sub;
+        op_a = 0;
+        result_t = co;
+      end
+      NOT: func = op_not;
+      OR, ORI: func = op_or;
+      XOR, XORI: func = op_xor;
+      BCLR, BCLRI: func = op_bclr;
+      BSET, BSETI: func = op_bset;
+      BNOT, BNOTI: func = op_bnot;
+      BTST, BTSTI: begin
+        func = op_btst;
+        result_t = f[0];
+      end
+      SLL, SLLI: func = op_sll;
+      SRL, SRLI: func = op_srl;
+      SRA, SRAI: func = op_sra;
+      ROT, ROTI: func = op_rot;
+      SEQ, SEQI: begin
+        func = op_sub;
+        result_t = z;
+      end 
+      SGE: begin
+        func = op_sub;
+        result_t = (n == v);
+      end
+      SGEU: begin
+        func = op_sub;
+        result_t = (z | co); 
+      end
+      SGT: begin
+        func = op_sub;
+        result_t = (!z & (n == v));
+      end
+      SGTU: begin
+        func = op_sub;
+        result_t = (!z & co);
+      end
+      EXTSB: func = op_ext;
+      EXTUB: begin
+        func = op_and;
+        op_a = 'h00ff;
+      end
+                  
+      // TODO: figure out the mul/div situation
+      MUL, MULI, MULUI: func = op_mul;
+      DIV, DIVI, DIVUI: begin
+        if (op_b == 0) begin
+          func = op_passb;
+          cdb_pkt.exc = `TRUE;
+        end
+        else func = op_div;
+      end
+      MOD, MODI: func = op_mod;
+      default:
+        cdb_pkt.exc = `TRUE;
     endcase
   end
   
 endmodule
 
 module alu(
-  input func,
-  input a,
-  input b,
-  input t_in,
-  output f,
-  output t_out,
+  input [4:0] func,
+  input [`XLEN-1:0] a,
+  input [`XLEN-1:0] b,
+  input ci,
+  output [`XLEN-1:0] f,
+  output co,
+  output v,
+  output z,
+  output n
 );
-  logic signed [`XLEN-1:0] a, b, f;
-  logic signed [`XLEN:0] val;
+  logic [`XLEN:0] val;
   
   assign f = val[`XLEN-1:0];
+  assign co = val[`XLEN];
+  assign v = a[`XLEN-2] ^ b[`XLEN-2] ^ val[`XLEN];
+  assign z = (f == '0);
+  assign n = val[`XLEN-1];
   
   always_comb begin
     case (func) 
       op_add:
-        val = a + b;
-      op_addc: begin
-        val = a + b + t_in;
-        t_out = f[`XLEN];
-      end
-      op_addv: begin
-        val = a + b;
-        t_out = a[`XLEN-2] ^ b[`XLEN-2] ^ val[`XLEN];
-      end
+        val = a + b + ci;
       op_sub:
-        val = a - b;
-      op_subc: begin
-        val = a - b - t_in;
-        t_out = f[`XLEN];
-      end
-      op_subv: begin
-        val = a - b;
-        t_out = a[`XLEN-2] ^ b[`XLEN-2] ^ val[`XLEN];
-      end
+        val = a - b - ci;
       op_passb:
         val = b;
       op_and:
@@ -108,10 +197,32 @@ module alu(
         val = ~b;
       op_xor:
         val = a ^ b;
-      default: begin
+      op_sll:
+        val = a >> b[3:0];
+      op_srl:
+        val = a << b[3:0];
+      op_sra:
+        val = a <<< b[3:0];
+      op_rot:
+        val = {2{a}} >> b[3:0];
+      op_ext:
+        val = {{8{b[7]}}, b[7:0]};
+      op_mul:
+        val = a * b;
+      op_div:
+        val = a / b;
+      op_mod:
+        val = a % b;
+      op_bclr:
+        val = a & ~(1 << b[3:0]);
+      op_bset:
+        val = a | (1 << b[3:0]);
+      op_bnot:
+        val = (a & (1 << b[3:0])) ? (a & ~(1 << b[3:0])) : (a | (1 << b[3:0]));
+      op_btst:
+        val = a[b[3:0]];
+      default:
         val = 'hbad1;
-        t_out = t_in;
-      end
     endcase
   end
 

@@ -140,7 +140,7 @@ module decode(
 endmodule
 
 module inst_decoder(
-  input [15:0] inst_i,
+  input [`XLEN-1:0] inst_i,
   output Inst_t inst_o
 );
 
