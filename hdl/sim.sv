@@ -11,7 +11,6 @@ module sim();
   logic clk;
   logic rst;
   
-  
 // memory - 95%
 memory #(mem_clear = 0, memfile = "program.mem") mem(
   .clk(clk),
@@ -28,8 +27,8 @@ memory #(mem_clear = 0, memfile = "program.mem") mem(
   
 // fetch ifu - 95% 
 fetch ifu(
-  .clk(),                       
-  .rst(),
+  .clk(clk),                       
+  .rst(rst),
   .br_taken(),  
   .br_addr(),   
   .dec_stall(), 
@@ -48,8 +47,8 @@ fetch ifu(
 
 // decode - 75% - needs rob_packet/fu_select
 decode id(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .if_id_pkt(),           
   .rob_rdy(),             
   .next_rob(),       
@@ -75,8 +74,8 @@ decode id(
   
 // ROB - 60%
 reorder rob(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .issue_pkt(),        
   .rob_wr_en(),            
   .cdb_pkt(),
@@ -100,8 +99,8 @@ reorder rob(
 
 // free list
 freelist fl(
-  clk(),
-  rst(),
+  clk(clk),
+  rst(rst),
   retire_en(),
   next_retire(),
   retire_t_en(),
@@ -116,8 +115,8 @@ freelist fl(
 
 // busybit vector  
 busybit bsy(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .cdb_pkt(),
   .freelist_en(),
@@ -132,8 +131,8 @@ busybit bsy(
   
 // maptable - 90% - needs rollback - controlled by rob?
 maptable rmap(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .map_rd_addr(),
   .map_wr_en(),
   .map_wr_data(),
@@ -145,7 +144,7 @@ maptable rmap(
 
 // regfile - 95%
 regfile regs(
-  .clk(),
+  .clk(clk),
   .reg_rd_addr(),
   .reg_wr_addr(),
   .reg_wr_data(),
@@ -155,8 +154,8 @@ regfile regs(
 
 // issue - 75% - use logisim design
 rs int_rs(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .rs_en(),
   .issue_pkt(),
@@ -168,8 +167,8 @@ rs int_rs(
 
 // int_fu - 95% - recycle
 int_alu int_0(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .issue_en(),
   .issue_inst(),
@@ -185,8 +184,8 @@ int_alu int_0(
 
 // int_fu - 95% - recycle
 int_alu int_1(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .issue_en(),
   .issue_inst(),
@@ -201,8 +200,8 @@ int_alu int_1(
 );
 
 rs br_rs(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .rs_en(),
   .issue_pkt(),
@@ -214,8 +213,8 @@ rs br_rs(
 
 // branch unit - 95% - simple (...)
 branch br(
-  .clk(),
-  .rst(),
+  .clk(clk),
+  .rst(rst),
   .recovery_en(),
   .issue_en(),
   .issue_inst(),
