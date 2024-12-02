@@ -16,7 +16,8 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
     int tmp;
 
     int shamt = (b & 0x0f);     // shift amount - one reserved for 32-bit impl.
-    if (debug) printf("Shift amt: %d\n", shamt);
+    if (debug && (func == sll || func == srl || func == sra || func == rot))
+        printf("Shift amt: %d\n", shamt);
 
     switch (func)
     {
@@ -76,7 +77,8 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             break;
 
         case not:
-            f = ~b;
+            utmp = ~(uint16_t)b;
+            f = utmp;
             break;
 
         case or:
@@ -218,6 +220,9 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             fprintf(stderr, "Bad ALU function: %d\n", func);
     }
 
-    if (debug) printf("ALU: %s %d, %d => %d, T: %d -> %d\n", instnames[func], a, b, f, oldt, tbit);
+    if (debug) {
+        printf("ALU: %s %d, %d => %d (0x%04X)  T: %d -> %d\n",
+            instnames[func], a, b, f, f, oldt, tbit);
+    }
     return f;
 }

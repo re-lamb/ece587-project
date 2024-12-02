@@ -120,7 +120,7 @@ module reorder(
       
       // mark instructions as complete
       for (int i = 0; i < 4; i++) begin
-        if (entry[cdb_pkt[i].idx].valid && cdb_pkt[i].en) begin
+        if (entry[cdb_pkt[i].idx].valid && cdb_pkt[i].valid) begin
           entry[cdb_pkt[i].idx].done <= `TRUE;
           entry[cdb_pkt[i].idx].exc <= cdb_pkt[i].exc;
         end

@@ -2,10 +2,11 @@ module exec_int(
   input clk,
   input rst,
   input recovery_en,
+  input issue_en,
   input Inst_t issue_inst,
-  input [`XLEN-1:0] reg_a, 
-  input [`XLEN-1:0] reg_b,
-  input reg_t,
+  input [`XLEN-1:0] rd_a, 
+  input [`XLEN-1:0] rd_b,
+  input rd_t,
   output Cdb_pkt_t cdb_pkt,
   output logic [`XLEN-1:0] result,
   output logic result_en,
@@ -13,36 +14,52 @@ module exec_int(
   output logic result_t_en
 );
   Inst_t inst;
+  logic [`XLEN-1:0] reg_a, reg_b;
+  logic reg_t;
   logic [`XLEN-1:0] op_a, op_b, f;
   logic [4:0] func;
   logic op_t, co, z, v, n;
   
   always_ff @(posedge clk) begin
-    if (rst || recovery_en) 
-      inst <= '0;
+    if (rst || recovery_en) begin
+      inst  <= '0;
+      reg_a <= '0;
+      reg_b <= '0;
+      reg_t <= '0;
+    end
+    else if (issue_en) begin
+      inst  <= issue_inst;
+      reg_a <= rd_a;
+      reg_b <= rd_b;
+      reg_t <= rd_t;
+    end
     else begin
-      inst <= issue_inst;
+      inst  <= '0;
+      reg_a <= '0;
+      reg_b <= '0;
+      reg_t <= '0;
     end
   end
   
   alu alu(
-    .func(func),
-    .a(op_a),
-    .b(op_b),
-    .ci(op_t),
-    .f(f),
-    .co(co),
-    .v(v),
-    .z(z),
-    .n(n)
+    .func (func),
+    .a    (op_a),
+    .b    (op_b),
+    .ci   (op_t),
+    .f    (f),
+    .co   (co),
+    .v    (v),
+    .z    (z),
+    .n    (n)
   );
   
   always_comb begin
     op_a = reg_a;
     op_b = (inst.use_imm) ? inst.imm : reg_b;
-    op_t = (inst.read_t) ? reg_t : '0;
-    cdb_pkt.en = (recovery_en) ? '0 : (inst.valid && inst.wb);
-    cdb_pkt.t_en = (recovery_en) ? '0 : (inst.valid && inst.wbt);
+    op_t = (inst.read_t) ? reg_t : `FALSE;
+    cdb_pkt.valid = (recovery_en) ? `FALSE : inst.valid;
+    cdb_pkt.en = cdb_pkt.valid && inst.wb;
+    cdb_pkt.t_en = cdb_pkt.valid && inst.wbt);
     cdb_pkt.idx = inst.rob_num;
     cdb_pkt.tag = inst.p_rd;
     cdb_pkt.t_tag = inst.p_t;

@@ -478,8 +478,8 @@ Instruction decode(uint16_t value)
             this.rd = 0;
 
             this.wbr = true;
-            this.imm =  (value & 0xff);
-            int16_t ext = (value & SIGNBIT(7)) ? this.imm |= 0xff00 : this.imm;
+            this.imm = (value & 0xff);
+            int16_t ext = (value & SIGNBIT(7)) ? (this.imm | 0xff00) : this.imm;
 
             switch (funct4) 
             {
@@ -625,12 +625,12 @@ Instruction decode(uint16_t value)
     if (debug)
     {
         printf("    op: 0x%02X  func: %d (%s)", this.form, this.func, instnames[this.func]);
-        printf("    rd: %d  rs1: %d  rs2: %d\n", this.rd, this.rs1, this.rs2);
-        printf("   imm: %d (0x%04X)  wb: %s\n", this.imm, this.imm, this.wbr ? "t" : "f");
+        printf("   rs1: %d  rs2: %d  rd: %d\n", this.rs1, this.rs2, this.rd);
+        printf("   imm: %d (%u)  wb: %s\n", this.imm, (uint16_t)this.imm, this.wbr ? "t" : "f");
         printf("    f1: 0x%04X  f4: 0x%04X  f6: 0x%04X\n", funct1, funct4, funct6);
-     }
-     */
- 
+    }
+    */
+
     if (this.func == unknown)
     {
         fprintf(stderr, "Unknown instruction 0x%04X!\n", value);

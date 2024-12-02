@@ -21,6 +21,9 @@
 `define PRW     $clog2(`PREGS)
 `define TRW     $clog2(`TREGS)
 
+`define RSSZ    8
+`define RSW     $clog2(`RSSZ)
+
 `define ROBSZ   16
 `define RBW     $clog2(`REGS)
 
@@ -83,23 +86,6 @@ typedef struct packed
   logic [`TRW-1:0] t_tag;
 } Cdb_pkt_t;
 
-/*
-typedef struct packed
-{
-  logic valid;
-  logic [`XLEN-1:0] inst;
-  logic [4:0] rd;
-  logic [4:0] rd_old;
-  logic [4:0] rs1;
-  logic [4:0] rs2;
-  logic [4:0] rob_num;
-  logic [1:0] bp_state;
-  logic bp_hit;
-  logic [`ALEN-1:0] pc;
-  logic [`ALEN-1:0] npc;
-} Id_is_pkt_t;
-*/
-
 typedef enum logic [4:0] {
   op_add,
   op_sub,
@@ -120,7 +106,6 @@ typedef enum logic [4:0] {
   op_bset,
   op_bnot,
   op_btst
-  
 } Alu_op_t;
 
 typedef enum logic [15:0] {

@@ -27,7 +27,7 @@ module decode(
   output [1:0] dec_stall,                     // output stall to ifu
 
   output [1:0] rob_wr_en,                     // rob entry enable
-  output [3:0] rs_en,                         // rs entry enable
+  output [1:0][3:0] rs_en,                    // rs entry enable
 
   output [1:0] freelist_en,                   // grab names from free list
   output [1:0] freelist_t_en,
@@ -66,8 +66,10 @@ module decode(
   assign rob_wr_en[0] = !dec_stall[0];                                          // add inst to rob
   assign rob_wr_en[1] = !dec_stall[1] && rob_wr_en[0];
 
-  assign rs_en[0] = rob_wr_en[0];                                               // add inst to rs
-  assign rs_en[1] = rob_wr_en[0] && rob_wr_en[1];
+  // TODO: figure out rs enable selection
+  // add inst to rs (if required)
+  assign rs_en[0] = rob_wr_en[0] && !(decode_inst[0].fu == `CTL | decode_inst[0].fu == `EXC); 
+  assign rs_en[1] = rob_wr_en[0] && rob_wr_en[1] && !(decode_inst[1].fu == `CTL | decode_inst[1].fu == `EXC);
 
   assign freelist_en[0] = !stall[0] && issue_pkt[0].wb;                         // take from free list
   assign freelist_en[1] = !(stall[0] | stall[1]) && issue_pkt[1].wb;
