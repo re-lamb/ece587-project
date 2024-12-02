@@ -4,6 +4,7 @@
  *
  * 4W/8R physical register file
  * 32 x 16b, pipelined with internal wr/rd forwarding
+ *
  */
 
 module regfile(

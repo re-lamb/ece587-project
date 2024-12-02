@@ -4,8 +4,9 @@
  *
  * register free list
  *
- * claim/retires 2 physical reg mappings per cycle
+ * claim/retire 2 physical reg mappings per cycle
  * as well as 2/2 t-bit mappings
+ *
  */
 
 module freelist(

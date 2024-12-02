@@ -9,30 +9,43 @@
 
 `define FALSE   1'b0
 `define TRUE    1'b1
-
+    
 `define XLEN    16
 `define ALEN    `XLEN
 `define MEMSZ   2 ** `ALEN
-
+  
 `define REGS    16
 `define TREGS   16
 `define PREGS   32
 `define ARW     $clog2(`REGS)
 `define PRW     $clog2(`PREGS)
 `define TRW     $clog2(`TREGS)
-
+    
 `define RSSZ    8
 `define RSW     $clog2(`RSSZ)
-
+    
 `define ROBSZ   16
 `define RBW     $clog2(`REGS)
-
+  
 `define CTL     0
 `define ALU     1
 `define STQ     2
 `define LDQ     3
 `define BR      4
 `define EXC     5
+  
+`define CDB_ALU0 0
+`define CDB_ALU1 1
+`define CDB_LSQ  2
+`define CDB_BR   3
+
+typedef enum logic [1:0]
+{
+		BP_SNT = 0,
+		BP_WNT = 1,
+		BP_WT = 2,
+		BP_ST = 3
+} Bp_state_t;
 
 typedef struct packed
 {
@@ -78,6 +91,7 @@ typedef struct packed
 
 typedef struct packed
 {
+  logic valid;
   logic en;
   logic t_en;
   logic exc;
@@ -86,10 +100,18 @@ typedef struct packed
   logic [`TRW-1:0] t_tag;
 } Cdb_pkt_t;
 
-typedef enum logic [4:0] {
+typedef struct packed
+{
+  logic [1:0] next_bp;
+  logic bp_wr;
+  logic [`ALEN-1:0] npc;
+} Br_pkt_t;
+
+typedef enum logic [4:0] 
+{
   op_add,
   op_sub,
-  op_passb,    // movs
+  op_passb,  
   op_and,
   op_not,
   op_or,

@@ -1,4 +1,14 @@
-module exec_int(
+/*
+ * ECE587 Fall 2024 Final Project
+ * R.E. Lamb
+ *
+ * ALU
+ * 
+ * integer ALU with mul/div - sim only  
+ *
+ */
+
+module int_alu(
   input clk,
   input rst,
   input recovery_en,

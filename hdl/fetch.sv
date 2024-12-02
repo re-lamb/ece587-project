@@ -3,6 +3,9 @@
  * R.E. Lamb
  *
  * instruction fetch unit
+ *
+ * assumes single cycle memory
+ *
  */
 
 module fetch(

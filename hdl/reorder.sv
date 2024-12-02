@@ -15,7 +15,8 @@ module reorder(
   input [1:0] rob_wr_en,                  // add to rob
   
   input Cdb_pkt_t [3:0] cdb_pkt,          // execution unit completion
-
+  input Br_pkt_t br_pkt,                  // branch unit completion
+  
   output recovery_en,                     // initiate rollback
   output [`ALEN-1:0] recovery_addr,       // exc. vector or branch addr
   output [1:0] rob_rdy,                   // rob entry available
@@ -29,8 +30,14 @@ module reorder(
   output [1:0] map_wr_en,
   output [1:0][`ARW-1:0] map_wr_addr,
   output [1:0][`PRW-1:0] map_wr_data
+  
+  output [`ALEN-1:0] bp_addr,
+  output [`ALEN-1:0] bp_target,
+  output [1:0][1:0] bp_state,
+  output [1:0] bp_wr
 );
   Inst_t [`ROBSZ-1:0] entry;
+  logic [`ROBSZ-1:0] update_br;
   logic [`RBW-1:0] rob_head, rob_tail;
   logic [`RBW-1:0] next_head, next_tail;
   logic [`RBW:0] rob_cnt, next_cnt;
@@ -57,6 +64,14 @@ module reorder(
   // TODO: placeholder 
   assign recovery_en = rollback_start;
   assign recovery_addr = (entry[rob_tail].valid && entry[rob_tail].exc) ? entry[rob_tail].npc : entry[rob_tail + 1].npc;
+ 
+  // update the bp
+  assign bp_addr[0] = entry[rob_tail].pc;
+  assign bp_addr[1] = entry[rob_tail + 1].pc;
+  assign bp_target[0] = entry[rob_tail].npc;
+  assign bp_target[1] = entry[rob_tail + 1].npc;
+  assign bp_wr[0] = (entry[rob_tail].valid && entry[rob_tail].done && update_br[rob_tail]);
+  assign bp_wr[1] = (!entry[rob_tail].exc && entry[rob_tail + 1].valid && entry[rob_tail + 1].done && update_br[rob_tail + 1]);
  
   // return reg to free list on retirement/rollback
   assign retire_en[0] = (rollback) ? (entry[rob_head].valid && entry[rob_head].wb) : 
@@ -88,10 +103,11 @@ module reorder(
   
   always @(posedge clk) begin
     if (rst) begin
-      rob_head <= '0;
-      rob_tail <= '0;
-      rob_cnt  <= '0;
-      rollback <= '0;
+      rob_head  <= '0;
+      rob_tail  <= '0;
+      rob_cnt   <= '0;
+      rollback  <= '0;
+      update_br <= '0;
     end
     if (entry[rob_tail].inst == EXIT | entry[rob_tail + 1].inst == EXIT) begin
       $display("exit encountered at %x", entry[rob_tail].pc);
@@ -99,17 +115,20 @@ module reorder(
     end 
     else if (rollback) begin      // rebuild state on mispredict/exception
       if (rob_cnt >= 2) begin
-        entry[rob_head].valid <= `FALSE;
+        entry[rob_head].valid     <= `FALSE;
         entry[rob_head + 1].valid <= `FALSE;
+        update_br[rob_head]       <= `FALSE;
+        update_br[rob_head + 1]   <= `FALSE;
         rob_head <= rob_head - 2;
-        rob_cnt <= rob_cnt - 2;
+        rob_cnt  <= rob_cnt - 2;
         if (rob_cnt == 2)
           rollback <= '0;
       end
       else if (rob_cnt > 0) begin
         entry[rob_head].valid <= `FALSE;
+        update_br[rob_head]   <= `FALSE;
         rob_head <= rob_head - 1;
-        rob_cnt <= '0;
+        rob_cnt  <= '0;
         rollback <= '0;
       end
     end
@@ -126,8 +145,15 @@ module reorder(
         end
       end
       
+      // if coming from the branch unit, set update flags
+      if (cdb_pkt[`CDB_BR].valid) begin
+        entry[cdb_pkt[`CDB_BR].idx].npc <= br_pkt.npc;
+        entry[cdb_pkt[`CDB_BR].idx].bp_state <= br_pkt.next_bp;
+        update_br[cdb_pkt[`CDB_BR].idx] <= br_pkt.bp_wr;
+      end
+        
       // add new instructions
-      if (rob_wr_en[0])
+      if (rob_wr_en[0]) 
         entry[next_rob[0]] <= issue_pkt[0];
       if (rob_wr_en[1])
         entry[next_rob[1]] <= issue_pkt[1];

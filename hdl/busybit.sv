@@ -2,8 +2,9 @@
  * ECE587 Fall 2024 Final Project
  * R.E. Lamb
  *
- * on issue read status of 4 reg + 2 tbits
+ * on issue read status of 4 regs + 2 tbits
  * on execution set 4 ready bits
+ *
  */
  
 module busybit(

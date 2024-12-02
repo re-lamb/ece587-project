@@ -3,6 +3,7 @@
  * R.E. Lamb
  *
  * CPU top level 
+ *
  */
 `include "defs.svh"
 
@@ -27,7 +28,7 @@ memory #(mem_clear = 0, memfile = "program.mem") mem(
   
 // fetch ifu - 95% 
 fetch ifu(
-  .clk(),
+  .clk(),                       
   .rst(),
   .br_taken(),  
   .br_addr(),   
@@ -58,7 +59,8 @@ decode id(
   .freelist_t_rdy(),      
   .next_free_t(),
   .map_rd_data(),    
-  .map_t_rd_data(),       
+  .map_t_rd_data(), 
+  .dec_stall(),
   .rob_wr_en(),          
   .rs_en(),              
   .freelist_en(),          
@@ -77,7 +79,8 @@ reorder rob(
   .rst(),
   .issue_pkt(),        
   .rob_wr_en(),            
-  .cdb_pkt(),        
+  .cdb_pkt(),
+  .br_pkt(),
   .recovery_en(),
   .recovery_addr(),
   .rob_rdy(),          
@@ -85,7 +88,14 @@ reorder rob(
   .retire_en(),        
   .next_retire(),      
   .retire_t_en(),        
-  .next_retire_t()         
+  .next_retire_t()   
+  .map_wr_en(),
+  .map_wr_addr(),
+  .map_wr_data(),
+  .bp_addr(),
+  .bp_target(),
+  .bp_state(),
+  .bp_wr()
 );
 
 // free list
@@ -109,10 +119,7 @@ busybit bsy(
   .clk(),
   .rst(),
   .recovery_en(),
-  .cdb_tag(),
-  .cdb_en(),
-  .t_tag(),
-  .t_en(),
+  .cdb_pkt(),
   .freelist_en(),
   .next_free(),
   .freelist_t_en(),
@@ -146,18 +153,86 @@ regfile regs(
   .reg_rd_data()
 );
 
-// issue - 50% - use logisim design
-issue is(           
+// issue - 75% - use logisim design
+rs int_rs(
+  .clk(),
+  .rst(),
+  .recovery_en(),
+  .rs_en(),
+  .issue_pkt(),
+  .reg_rdy(),
+  .reg_rdy_t(),
+  .fu_rdy(),
+  .cdb_pkt()
 );
 
-loadstore lsu(      - 0% - xxx
+// int_fu - 95% - recycle
+int_alu int_0(
+  .clk(),
+  .rst(),
+  .recovery_en(),
+  .issue_en(),
+  .issue_inst(),
+  .rd_a(),
+  .rd_b(),
+  .rd_t(),
+  .cdb_pkt(),
+  .result(),
+  .result_en(),
+  .result_t(),
+  .result_t_en()
 );
 
-alu alu(            - 0% - recycle
+// int_fu - 95% - recycle
+int_alu int_1(
+  .clk(),
+  .rst(),
+  .recovery_en(),
+  .issue_en(),
+  .issue_inst(),
+  .rd_a(),
+  .rd_b(),
+  .rd_t(),
+  .cdb_pkt(),
+  .result(),
+  .result_en(),
+  .result_t(),
+  .result_t_en()
 );
 
-branch br(         - 0% - simple
+rs br_rs(
+  .clk(),
+  .rst(),
+  .recovery_en(),
+  .rs_en(),
+  .issue_pkt(),
+  .reg_rdy(),
+  .reg_rdy_t(),
+  .fu_rdy(),
+  .cdb_pkt()
 );
 
+// branch unit - 95% - simple (...)
+branch br(
+  .clk(),
+  .rst(),
+  .recovery_en(),
+  .issue_en(),
+  .issue_inst(),
+  .rd_a(),
+  .rd_t(),
+  .cdb_pkt(),
+  .br_pkt(),
+  .npc(),
+  .result(),
+  .result_en()
+);
+
+/*
+// load/store unit - 0% - xxx
+loadstore lsu(   
+   
+);
+*/
   
 endmodule

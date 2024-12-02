@@ -1,4 +1,4 @@
-module issue(
+module rs(
   input clk,
   input rst,
   input recovery_en,
