@@ -69,8 +69,8 @@
     movt {m: DREG}     =>  0b0001_0 @ m @ 0b0000_0000
     dt   {m: DREG}     =>  0b0001_0 @ m @ 0b0000_0001
     dt   {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0010
-    braf {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0011
-    bsrf {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0100
+    br   {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0011
+    bsr  {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0100
     jmp  {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0101
     jsr  {m: AREG}     =>  0b0001_0 @ m @ 0b0000_0110
     sgz  {m: DREG}     =>  0b0001_0 @ m @ 0b0000_0111
@@ -171,7 +171,7 @@
 
 #ruledef
 {
-    bra     {label: disp12}     =>  0b1110 @ label
+    br      {label: disp12}     =>  0b1110 @ label
     bsr     {label: disp12}     =>  0b1111 @ label
 }
 

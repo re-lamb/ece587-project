@@ -109,6 +109,14 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             tbit = ((uint16_t)b > (uint16_t)a) ? 1 : 0;
             break;
 
+        case sgz:
+            tbit = (a > 0) ? 1 : 0;
+            break;
+
+        case sgzu:
+            tbit = ((uint16_t)a > 0) ? 1 : 0;
+            break;
+
         case exts:
             f = (b & 0x80) ? (b | 0xff00) : b;
             break;
@@ -132,8 +140,9 @@ int16_t aluop(int16_t a, int16_t b, InstNum func)
             break;
 
         case rot:
-            utmp = (a << 16) | a;
-            f = utmp >> shamt;
+            // gcc aggressively sign extends if you don't coerce it here
+            utmp = ((uint16_t)a << 16) | (uint16_t)a;
+            f = (utmp >> shamt) & 0xffff;
             break;
 
         case bclr:

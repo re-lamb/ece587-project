@@ -12,7 +12,9 @@ module rs(
   output [1:0] rs_rdy,
   
   output logic [1:0] issue_en,
-  output [3:0][`PRW-1:0] op_rd_addr
+  output Inst_t [1:0] rs_issue_pkt,
+  output [3:0][`PRW-1:0] op_rd_addr,
+  output [1:0][`TRW-1:0] op_t_rd_addr
 );
   logic [`RSSZ-1:0] rdy_rs1, rdy_rs2, rdy_t, valid;
   logic [`RSW-1:0] next_rdy_rs1, next_rdy_rs2, next_rdy_t, next_rdy;
@@ -50,6 +52,17 @@ module rs(
     end
 
   end
+  
+  assign op_rd_addr[0] = entry[next_issue[0]].p_rs1;
+  assign op_rd_addr[1] = entry[next_issue[0]].p_rs2;
+  assign op_rd_addr[2] = entry[next_issue[1]].p_rs1;
+  assign op_rd_addr[3] = entry[next_issue[1]].p_rs2;
+  
+  assign op_t_rd_addr[0] = entry[next_issue[0]].p_t;
+  assign op_t_rd_addr[1] = entry[next_issue[1]].p_t;
+  
+  assign rs_issue_pkt[0] = entry[next_issue[0]];
+  assign rs_issue_pkt[1] = entry[next_issue[1]];
   
   // next free slot selection 
   // TODO: THIS SHOULD BE A PARAMETERIZED MODULE
@@ -118,7 +131,7 @@ module rs(
         if (entry[i].valid && cdb_pkt[j].t_en && (cdb_pkt[j].t_tag == entry[i].p_t))
           next_rdy_t[i] <= `TRUE;
         else
-          next_rdy_t <= rdy_t[i];
+          next_rdy_t[i] <= rdy_t[i];
       end
     end
   end

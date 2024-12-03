@@ -8,7 +8,6 @@
  * writes are byte addressable, all reads are 16b
  *
  */
-`include "defs.svh"
 
 module memory 
   #(parameter mem_clear = 0,
@@ -27,7 +26,7 @@ module memory
   output [`ALEN-1:0] rd_data_1,
   output [`ALEN-1:0] rd_data_2
 );
-  logic [`MEMSZ-1:0][7:0] mem;
+  logic [7:0] mem [0:`MEMSZ-1];
   
   generate
     initial begin

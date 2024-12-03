@@ -29,7 +29,10 @@ module reorder(
 
   output [1:0] map_wr_en,
   output [1:0][`ARW-1:0] map_wr_addr,
-  output [1:0][`PRW-1:0] map_wr_data
+  output [1:0][`PRW-1:0] map_wr_data,
+  
+  output map_t_wr_en,
+  output [`TRW-1:0] map_t_wr_data,
   
   output [`ALEN-1:0] bp_addr,
   output [`ALEN-1:0] bp_target,
@@ -40,13 +43,15 @@ module reorder(
   logic [`ROBSZ-1:0] update_br;
   logic [`RBW-1:0] rob_head, rob_tail;
   logic [`RBW-1:0] next_head, next_tail;
-  logic [`RBW:0] rob_cnt, next_cnt;
+  logic [`RBW:0] rob_cnt, next_cnt; //next_add, next_sub;
   logic [1:0] rob_ret_en;
   logic rollback, rollback_start;
   
-  assign next_head = (rob_wr_en[1]) ? rob_head + 2 : (rob_wr_en[0]) ? rob_head + 1 : 0;
-  assign next_tail = (rob_ret_en[1]) ? rob_tail + 2 : (rob_ret_en[0]) ? rob_tail + 1 : 0;
-  assign next_cnt = rob_wr_en[0] + rob_wr_en[1] - rob_ret_en[0] - rob_ret_en[1];
+  assign next_head = (rob_wr_en[1]) ? rob_head + 2 : (rob_wr_en[0]) ? rob_head + 1 : rob_head;
+  assign next_tail = (rob_ret_en[1]) ? rob_tail + 2 : (rob_ret_en[0]) ? rob_tail + 1 : rob_tail;
+  //assign next_add = (rob_wr_en[1]) ? 2 : (rob_wr_en[0]) ? 1 : 0;
+  //assign next_sub = (rob_ret_en[1]) ? 2 : (rob_ret_en[0]) ? 1 : 0;
+  assign next_cnt = rob_cnt + rob_wr_en[0] + rob_wr_en[1] - rob_ret_en[0] - rob_ret_en[1]; //rob_cnt + next_add - next_sub;
   
   assign rob_rdy[0] = (rob_cnt < `ROBSZ) && !(rollback_start || rollback) ? '1 : '0;
   assign rob_rdy[1] = ((rob_cnt + 1) < `ROBSZ) && !(rollback_start || rollback) ? '1 : 0;
@@ -58,8 +63,7 @@ module reorder(
   assign rob_ret_en[1] = (rob_ret_en[0] && entry[rob_tail + 1].valid && entry[rob_tail + 1].done && !entry[rob_tail + 1].exc);
   
   // don't delay, rollback today
-  assign rollback_start = (entry[rob_tail].valid && entry[rob_tail].exc) |
-                          (entry[rob_tail + 1].valid && entry[rob_tail + 1].exc);
+  assign rollback_start = ((entry[rob_tail].valid && entry[rob_tail].exc) | (entry[rob_tail + 1].valid && entry[rob_tail + 1].exc)) ? '1 : '0;
                           
   // TODO: placeholder 
   assign recovery_en = rollback_start;
@@ -101,6 +105,11 @@ module reorder(
   assign map_wr_en[1] = (rollback && entry[rob_head + 1].valid && entry[rob_head + 1].wb && 
                         (entry[rob_head].rd != entry[rob_head + 1].rd));
   
+  assign map_t_wr_en = rollback && (entry[rob_head].valid && entry[rob_head].wbt) | 
+                                   (entry[rob_head + 1].valid && entry[rob_head + 1].wbt);
+  assign map_t_wr_data = (rollback && entry[rob_head].valid && entry[rob_head].wbt) ? entry[rob_head].t_stale : 
+                                                                                      entry[rob_head + 1].t_stale;
+  
   always @(posedge clk) begin
     if (rst) begin
       rob_head  <= '0;
@@ -108,8 +117,9 @@ module reorder(
       rob_cnt   <= '0;
       rollback  <= '0;
       update_br <= '0;
+      entry   <= '0;
     end
-    if (entry[rob_tail].inst == EXIT | entry[rob_tail + 1].inst == EXIT) begin
+    else if (entry[rob_tail].inst == EXIT | entry[rob_tail + 1].inst == EXIT) begin
       $display("exit encountered at %x", entry[rob_tail].pc);
       $finish;
     end 
@@ -161,7 +171,7 @@ module reorder(
       // retire completed
       if (rob_ret_en[0])
         entry[rob_tail].valid <= `FALSE;
-      if (rob_wr_en[1])
+      if (rob_ret_en[1])
         entry[rob_tail + 1].valid <= `FALSE;
       
       // only handle oldest exception
