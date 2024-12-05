@@ -169,16 +169,16 @@ module rs(
       
       // invalidate on issue
       if (issue_en[0]) begin 
-        valid[next_issue[0]]  <= `FALSE;
-        rdy_rs1[next_free[0]] <= `FALSE;
-        rdy_rs2[next_free[0]] <= `FALSE;
-        rdy_t[next_free[0]]   <= `FALSE;
+        valid[next_issue[0]]   <= `FALSE;
+        rdy_rs1[next_issue[0]] <= `FALSE;
+        rdy_rs2[next_issue[0]] <= `FALSE;
+        rdy_t[next_issue[0]]   <= `FALSE;
       end
       if (issue_en[1]) begin 
-        valid[next_issue[1]]  <= `FALSE;
-        rdy_rs1[next_free[1]] <= `FALSE;
-        rdy_rs2[next_free[1]] <= `FALSE;
-        rdy_t[next_free[1]]   <= `FALSE;
+        valid[next_issue[1]]   <= `FALSE;
+        rdy_rs1[next_issue[1]] <= `FALSE;
+        rdy_rs2[next_issue[1]] <= `FALSE;
+        rdy_t[next_issue[1]]   <= `FALSE;
       end
     end
   end

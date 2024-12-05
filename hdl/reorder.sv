@@ -64,7 +64,6 @@ module reorder(
   assign next_rob[1] = rob_head_plus;
   
   
-  
   assign rob_ret_en[0] = (entry[rob_tail].valid && entry[rob_tail].done && !entry[rob_tail].exc);
   assign rob_ret_en[1] = (rob_ret_en[0] && entry[rob_tail_plus].valid && entry[rob_tail_plus].done && !entry[rob_tail_plus].exc);
   
@@ -127,7 +126,7 @@ module reorder(
       update_br <= '0;
       entry   	<= '0;
     end
-    else if (entry[rob_tail].inst == EXIT | entry[rob_tail_plus].inst == EXIT) begin
+    else if (entry[rob_tail].inst == EXIT || entry[rob_tail_plus].inst == EXIT) begin
       $display("exit encountered at %x", entry[rob_tail].pc);
       $finish;
     end 

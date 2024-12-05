@@ -10,7 +10,7 @@
  */
 
 module memory 
-  #(parameter mem_clear = 0,
+  #(parameter mem_clear = 1,
     parameter memfile = "") 
   (
   input clk,
