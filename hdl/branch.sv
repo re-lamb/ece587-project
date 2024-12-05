@@ -36,34 +36,15 @@ module branch(
     cdb_pkt.idx = inst.rob_num;
     cdb_pkt.tag = inst.p_rd;
     cdb_pkt.t_tag = '0;
-    cdb_pkt.exc = (npc != inst.npc) ? `TRUE : `FALSE;
-    br_pkt.npc = npc;
-
-    if (npc != inst.npc) begin
-      case (inst.bp_state)
-        BP_SNT: br_pkt.next_bp = BP_WNT;
-        BP_WNT: br_pkt.next_bp = BP_WT;
-        BP_WT:  br_pkt.next_bp = BP_WNT;
-        BP_ST:  br_pkt.next_bp = BP_WT;
-      endcase
-    end
-    else begin
-      case (inst.bp_state)
-        BP_SNT: br_pkt.next_bp = BP_SNT;
-        BP_WNT: br_pkt.next_bp = BP_SNT;
-        BP_WT:  br_pkt.next_bp = BP_ST;
-        BP_ST:  br_pkt.next_bp = BP_ST;
-      endcase
-    end
 
     br_pkt.next_bp = inst.bp_state;
     br_pkt.bp_wr = `FALSE;
 
-    npc = inst.pc;
+    
     result = inst.pc + 2;
     result_en = cdb_pkt.en;
 
-    case (inst.inst)
+    case (inst.inst) inside
       BRAF, BSRF:
         npc = op_a + op_b;
       JMP, JSR:
@@ -84,7 +65,29 @@ module branch(
         npc = (op_b + (inst.imm << 1));
         br_pkt.bp_wr = `TRUE;
       end
+      default:
+        npc = inst.pc;
     endcase
+    
+    if (npc != inst.npc) begin
+      case (inst.bp_state)
+        BP_SNT: br_pkt.next_bp = BP_WNT;
+        BP_WNT: br_pkt.next_bp = BP_WT;
+        BP_WT:  br_pkt.next_bp = BP_WNT;
+        BP_ST:  br_pkt.next_bp = BP_WT;
+      endcase
+    end
+    else begin
+      case (inst.bp_state)
+        BP_SNT: br_pkt.next_bp = BP_SNT;
+        BP_WNT: br_pkt.next_bp = BP_SNT;
+        BP_WT:  br_pkt.next_bp = BP_ST;
+        BP_ST:  br_pkt.next_bp = BP_ST;
+      endcase
+    end
+    
+    cdb_pkt.exc = (npc != inst.npc) ? `TRUE : `FALSE;
+    br_pkt.npc = npc;
   end
 
   always_ff @(posedge clk) begin

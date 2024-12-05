@@ -41,9 +41,15 @@ module decode(
   output [1:0][`TRW-1:0] map_t_rd_addr,
 
   output [3:0][`PRW-1:0] bb_rd_addr,
+  input [3:0] bb_rd,
+  
   output [1:0][`TRW-1:0] bb_t_rd_addr,
+  input [1:0] bb_t_rd,
 
-  output Inst_t [1:0] issue_pkt
+  output Inst_t [1:0] issue_pkt,
+  
+  output [3:0] rdy,
+  output [1:0] rdy_t
 );
   Inst_t [1:0] decode_inst;
 
@@ -66,17 +72,27 @@ module decode(
 
   assign bb_t_rd_addr[0] = issue_pkt[0].p_t;
   assign bb_t_rd_addr[1] = issue_pkt[1].p_t;
+  
+  assign rdy[0] = !(issue_pkt[0].read_rs1) ? `TRUE : bb_rd[0];
+  assign rdy[1] = !(issue_pkt[0].read_rs2) ? `TRUE : bb_rd[1];
+  assign rdy[2] = !(issue_pkt[1].read_rs1) ? `TRUE : ((issue_pkt[0].rd == issue_pkt[1].rs1) && issue_pkt[0].wb) ? `FALSE : bb_rd[2];
+  assign rdy[3] = !(issue_pkt[1].read_rs2) ? `TRUE : ((issue_pkt[0].rd == issue_pkt[1].rs2) && issue_pkt[0].wb) ? `FALSE : bb_rd[3];
+  
+  assign rdy_t[0] = !(issue_pkt[0].read_t) ? `TRUE : bb_t_rd[0];
+  assign rdy_t[1] = !(issue_pkt[1].read_t) ? `TRUE : (issue_pkt[0].wbt) ? `FALSE : bb_t_rd[1];
 
-  assign dec_stall[0] = (!if_id_pkt[0].valid || !rob_rdy[0]       ||             // no rob entry
-                        (issue_pkt[0].wb && !freelist_rdy[0])      ||             // no free reg
-                        (issue_pkt[0].wbt && !freelist_t_rdy[0])   ||            // no free t reg
-                        !rs_rdy[0][issue_pkt[0].fu]);                          // no free rs
-
-  assign dec_stall[1] = (dec_stall[0]                             ||
-                        !if_id_pkt[1].valid || !rob_rdy[1]       ||
-                        (issue_pkt[1].wb && !freelist_rdy[1])      ||
-                        (issue_pkt[1].wbt && !freelist_t_rdy[1])   ||
-                        !rs_rdy[1][issue_pkt[1].fu]);
+  assign dec_stall[0] = (!if_id_pkt[0].valid || 
+                         !rob_rdy[0] || 
+                         (issue_pkt[0].wb && !freelist_rdy[0]) || 
+                         (issue_pkt[0].wbt && !freelist_t_rdy[0]) || 
+                         !(rs_rdy[0][issue_pkt[0].fu[1:0]])) ? `TRUE : `FALSE; 
+  
+  assign dec_stall[1] = (dec_stall[0] || 
+                         !if_id_pkt[1].valid || 
+                         !rob_rdy[1] || 
+                         (issue_pkt[1].wb && !freelist_rdy[1]) || 
+                         (issue_pkt[1].wbt && !freelist_t_rdy[1]) || 
+                         !rs_rdy[1][issue_pkt[1].fu[1:0]]) ? `TRUE : `FALSE;
 
   assign rob_wr_en[0] = !dec_stall[0];                                          // add inst to rob
   assign rob_wr_en[1] = !dec_stall[1] && rob_wr_en[0];
@@ -101,7 +117,7 @@ module decode(
   assign map_t_wr_data = (freelist_t_en[1]) ? next_free_t[1] : next_free_t[0];  // update only newest mapping
 
   // for debug i'm saving eeeeeverything, pare down later
-  assign issue_pkt[0].valid    = !dec_stall[0];                                     // and we're off!
+  assign issue_pkt[0].valid    = (dec_stall[0]) ? `FALSE : `TRUE;               // and we're off!
   assign issue_pkt[0].done     = (decode_inst[0].fu == 4 || decode_inst[0].fu == 5) ? `TRUE : `FALSE;  // control instructions have no exec stage
   assign issue_pkt[0].exc      = (decode_inst[0].fu == 4) ? `TRUE : `FALSE;
   assign issue_pkt[0].inst     = if_id_pkt[0].inst;
@@ -129,7 +145,7 @@ module decode(
   assign issue_pkt[0].p_t      = next_free_t[0];                                // t mapping for write
   assign issue_pkt[0].t_stale  = map_t_rd_data;                                 // t unmap name
 
-  assign issue_pkt[1].valid    = !dec_stall[1];
+  assign issue_pkt[1].valid    = (dec_stall[1]) ? `FALSE : `TRUE;
   assign issue_pkt[1].done     = (decode_inst[1].fu == 4 || decode_inst[1].fu == 5) ? `TRUE : `FALSE;
   assign issue_pkt[1].exc      = (decode_inst[1].fu == 4) ? `TRUE : `FALSE;
   assign issue_pkt[1].inst     = if_id_pkt[1].inst;
@@ -160,7 +176,7 @@ module decode(
 endmodule
 
 module inst_decoder(
-  input [`XLEN-1:0] inst_i,
+  input logic [`XLEN-1:0] inst_i,
   output Inst_t inst_o
 );
 
@@ -213,7 +229,7 @@ module inst_decoder(
         inst_o.imm = {{12{inst_i[7]}}, inst_i[3:0]};    // 5-bit sign-extended
       end
       'b1000: begin                                     // bf/bt sign-extend
-        inst_o.imm = (inst_i == BF | inst_i == BT) ? {{9{inst_i[7]}}, inst_i[6:0]} : {8'b0, inst_i[7:0]} ;
+        inst_o.imm = (inst_i === BF || inst_i === BT) ? {{9{inst_i[7]}}, inst_i[6:0]} : {8'b0, inst_i[7:0]} ;
       end
       'b1001, 'b1010, 'b1011,
       'b1100: begin

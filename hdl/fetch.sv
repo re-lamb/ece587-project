@@ -65,8 +65,8 @@ module fetch(
 
       if_id_pkt[0].bp_hit <= bp_hit[0];
       if_id_pkt[1].bp_hit <= bp_hit[1];
-      if_id_pkt[0].bp_state <= bp_state;
-      if_id_pkt[1].bp_state <= bp_state;
+      if_id_pkt[0].bp_state <= bp_state[0];
+      if_id_pkt[1].bp_state <= bp_state[1];
     end
   end
 

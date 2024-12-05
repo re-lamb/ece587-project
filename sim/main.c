@@ -63,7 +63,7 @@ uint8_t *loadfile(FILE *fp)
             // ignore the header line:  "outp | addr | data (base 16)"
             // ignore labels:           "6c:0 |   6c |       ; fail:" (ends in ':')
             // and don't complain about blank lines.
-            if (len <= 1 || buf[len - 2] == ':' || strncmp(buf, " outp", 5) == 0) continue;
+            if (len <= 1 || buf[len - 2] == ':' || strncmp(junk, "outp", 4) == 0) continue;
 
             // whine about everything else
             fprintf(stderr, "Bad input at line %d ignored: '%s'\n", lc, line);

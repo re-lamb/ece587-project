@@ -33,7 +33,7 @@ module memory
       if (mem_clear)
         for (integer i = 0; i < `MEMSZ; i++)
           mem[i] = '0;
-      if(|memfile) begin
+      if (|memfile) begin
         $display("Preloading %m from %s", memfile);
         $readmemh(memfile, mem);
       end

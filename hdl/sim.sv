@@ -12,7 +12,6 @@
 `include "fetch.sv"
 `include "freelist.sv"
 `include "int_alu.sv"
-`include "issue.sv"
 `include "maptable.sv"
 `include "memory.sv"
 `include "regfile.sv"
@@ -27,7 +26,7 @@ module sim(
   logic [1:0][`ALEN-1:0] fetch_pc;
   logic [1:0][`ALEN-1:0] fetch_inst;
 
-  logic [`ALEN-1:0] branch_addr;
+  logic [`ALEN-1:0] recovery_addr;
   logic [1:0] dec_stall;
 
   If_id_pkt_t [1:0] if_id_pkt;
@@ -59,6 +58,8 @@ module sim(
 
   logic [3:0][`PRW-1:0] bb_rd_addr;
   logic [1:0][`TRW-1:0] bb_t_rd_addr;
+  logic [3:0] bb_rd;
+  logic [1:0] bb_t_rd;
 
   logic [1:0] map_wr_en_dec;
   logic [1:0] map_wr_en_rob;
@@ -86,13 +87,13 @@ module sim(
   logic [1:0] rdy_t;
 
   logic [7:0][`PRW-1:0] reg_rd_addr;
-  logic [3:0][`PRW-1:0] reg_wr_addr;
+  // logic [3:0][`PRW-1:0] reg_wr_addr;
   logic [3:0][`XLEN-1:0] reg_wr_data;
   logic [7:0][`XLEN-1:0] reg_rd_data;
   logic [3:0] reg_wr_en;
 
   logic [3:0][`TRW-1:0] reg_t_rd_addr;
-  logic [1:0][`TRW-1:0] reg_t_wr_addr;
+  // logic [1:0][`TRW-1:0] reg_t_wr_addr;
   logic [3:0] reg_t_rd_data;
   logic [1:0] reg_t_wr_data;
   logic [1:0] reg_t_wr_en;
@@ -104,11 +105,14 @@ module sim(
   Inst_t [1:0] br_issue_pkt;
 
   // TODO: think on this a bit
-  assign map_wr_en = (map_wr_en_rob | map_wr_en_dec);
-  assign map_wr_data = (map_wr_en_rob) ? map_wr_data_rob : map_wr_data_dec;
-  assign map_rd_addr = (map_wr_en_rob) ? {'0, map_wr_addr_rob[1], '0, map_wr_addr_rob[0]} : map_rd_addr_dec;
-  assign map_t_wr_en = (map_wr_en_rob) ? '1 : map_wr_en_dec;
-  assign map_t_wr_data = (map_wr_en_rob) ? map_t_wr_data_rob : map_t_wr_data_dec;
+  assign map_wr_en = (|map_wr_en_rob) ?  map_wr_en_rob : map_wr_en_dec;
+  assign map_wr_data = (|map_wr_en_rob) ? map_wr_data_rob : map_wr_data_dec;
+  assign map_rd_addr = (|map_wr_en_rob) ? {4'b0, map_wr_addr_rob[1], 4'b0, map_wr_addr_rob[0]} : map_rd_addr_dec;
+  assign map_t_wr_en = (map_t_wr_en_rob) ? '1 : map_t_wr_en_dec;
+  assign map_t_wr_data = (map_t_wr_en_rob) ? map_t_wr_data_rob : map_t_wr_data_dec;
+  
+  assign reg_wr_en[3] = '0;
+  assign reg_wr_data[3] = '0;
 
   assign cdb_pkt[`CDB_LSQ] = '0;
   assign rs_rdy[0][3:2] = '0;
@@ -134,11 +138,11 @@ fetch ifu(
   .clk(clk),
   .rst(rst),
   .br_taken(recovery_en),
-  .br_addr(branch_addr),
+  .br_addr(recovery_addr),
   .dec_stall(dec_stall),
-  .bp_hit('0),
-  .bp_taken('0),
-  .bp_state('0),
+  .bp_hit({'0, '0}),
+  .bp_taken({'0, '0}),
+  .bp_state({'0, '0}),
   .bp_addr('0),
   .inst(fetch_inst),
   .fetch_pc(fetch_pc),
@@ -176,6 +180,10 @@ decode id(
   .map_t_rd_addr(map_t_rd_addr),
   .bb_rd_addr(bb_rd_addr),
   .bb_t_rd_addr(bb_t_rd_addr),
+  .bb_rd(bb_rd),
+  .bb_t_rd(bb_t_rd),
+  .rdy(rdy),
+  .rdy_t(rdy_t),
   .issue_pkt(issue_pkt)
 );
 
@@ -188,7 +196,7 @@ reorder rob(
   .cdb_pkt(cdb_pkt),
   .br_pkt(br_pkt),
   .recovery_en(recovery_en),
-  .recovery_addr(branch_addr),
+  .recovery_addr(recovery_addr),
   .rob_rdy(rob_rdy),
   .next_rob(next_rob),
   .retire_en(retire_en),
@@ -234,8 +242,8 @@ busybit bsy(
   .next_free_t(next_free_t),
   .rd_addr(bb_rd_addr),
   .rd_addr_t(bb_t_rd_addr),
-  .rdy(rdy),
-  .rdy_t(rdy_t)
+  .rdy(bb_rd),
+  .rdy_t(bb_t_rd)
 );
 
 // maptable - 90% - needs rollback - controlled by rob?
@@ -245,7 +253,7 @@ maptable rmap(
   .map_rd_addr(map_rd_addr),
   .map_wr_en(map_wr_en),
   .map_wr_data(map_wr_data),
-  .map_t_wr_en({'0, map_t_wr_en}),
+  .map_t_wr_en(map_t_wr_en),
   .map_t_wr_data(map_t_wr_data),
   .map_rd_data(map_rd_data),
   .map_t_rd_data(map_t_rd_data)
@@ -254,6 +262,7 @@ maptable rmap(
 // regfile - 95%
 regfile regs(
   .clk(clk),
+  .rst(rst),
   .reg_rd_addr(reg_rd_addr),
   .reg_wr_addr({cdb_pkt[3].tag, cdb_pkt[2].tag, cdb_pkt[1].tag, cdb_pkt[0].tag}),
   .reg_wr_data(reg_wr_data),
@@ -341,7 +350,7 @@ branch br(
   .rst(rst),
   .recovery_en(recovery_en),
   .issue_en(br_issue_en[0]),
-  .issue_inst(),
+  .issue_inst(br_issue_pkt[0]),
   .rd_a(reg_rd_data[4]),
   .rd_t(reg_t_rd_data[2]),
   .cdb_pkt(cdb_pkt[`CDB_BR]),

@@ -13,19 +13,19 @@ module maptable(
   input clk,
   input rst,
 
-  input [3:0][3:0] map_rd_addr,
+  input [3:0][`ARW-1:0] map_rd_addr,
   
   input [1:0] map_wr_en,
-  input [1:0][4:0] map_wr_data,
+  input [1:0][`PRW-1:0] map_wr_data,
   
-  input [1:0] map_t_wr_en,
-  input [3:0] map_t_wr_data,
+  input map_t_wr_en,
+  input [`TRW-1:0] map_t_wr_data,
   
-  output [3:0][4:0] map_rd_data,
-  output [3:0] map_t_rd_data  
+  output [3:0][`PRW-1:0] map_rd_data,
+  output [`TRW-1:0] map_t_rd_data  
 );
 
-  logic [15:0][4:0] map;
+  logic [`REGS-1:0][4:0] map;
   logic [3:0] tmap;
 
   assign map_rd_data[0] = map[map_rd_addr[0]];

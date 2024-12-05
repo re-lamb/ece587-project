@@ -3,8 +3,8 @@
  * R.E. Lamb
  *
  * ALU
- *
- * integer ALU with mul/div - sim only
+ * 
+ * integer ALU with mul/div - sim only  
  *
  */
 
@@ -14,7 +14,7 @@ module int_alu(
   input recovery_en,
   input issue_en,
   input Inst_t issue_inst,
-  input [`XLEN-1:0] rd_a,
+  input [`XLEN-1:0] rd_a, 
   input [`XLEN-1:0] rd_b,
   input rd_t,
   output Cdb_pkt_t cdb_pkt,
@@ -29,7 +29,7 @@ module int_alu(
   logic [`XLEN-1:0] op_a, op_b, f;
   logic [4:0] func;
   logic op_t, co, z, v, n;
-
+  
   always_ff @(posedge clk) begin
     if (rst || recovery_en) begin
       inst  <= '0;
@@ -50,7 +50,7 @@ module int_alu(
       reg_t <= '0;
     end
   end
-
+  
   alu alu(
     .func (func),
     .a    (op_a),
@@ -62,7 +62,7 @@ module int_alu(
     .z    (z),
     .n    (n)
   );
-
+  
   always_comb begin
     op_a = reg_a;
     op_b = (inst.use_imm) ? inst.imm : reg_b;
@@ -73,14 +73,17 @@ module int_alu(
     cdb_pkt.idx = inst.rob_num;
     cdb_pkt.tag = inst.p_rd;
     cdb_pkt.t_tag = inst.p_t;
-
+    cdb_pkt.exc = inst.exc;
+    
+    func = op_nop;
     result = f;
     result_t = op_t;
     result_en = cdb_pkt.en;
     result_t_en = cdb_pkt.t_en;
-
-    case (inst.inst)
-      CLRT: result_t = '0;
+    
+    case (inst.inst) inside
+      NOP:  func = op_nop;
+      CLRT: result_t = '0; 
       SETT: result_t = '1;
       NOTT: result_t = ~reg_t;
       MOVT: result = reg_t;
@@ -100,9 +103,9 @@ module int_alu(
       end
       MOV, MOVDA, MOVA, MOVAD, MOVI: func = op_passb;
       ADD, ADDA, ADDDA, ADDI, ADDIA: func = op_add;
-      ADDC: begin
-        func = op_add;
-        result_t = co;
+      ADDC: begin 
+        func = op_add; 
+        result_t = co; 
       end
       ADDV: begin
         func = op_add;
@@ -117,7 +120,7 @@ module int_alu(
       SUBV: begin
         func = op_sub;
         result_t = v;
-      end
+      end      
       AND, ANDI: func = op_and;
       TST, TSTI: begin
         func = op_and;
@@ -149,14 +152,14 @@ module int_alu(
       SEQ, SEQI: begin
         func = op_sub;
         result_t = z;
-      end
+      end 
       SGE: begin
         func = op_sub;
         result_t = (n == v);
       end
       SGEU: begin
         func = op_sub;
-        result_t = (z | co);
+        result_t = (z | co); 
       end
       SGT: begin
         func = op_sub;
@@ -171,22 +174,24 @@ module int_alu(
         func = op_and;
         op_a = 'h00ff;
       end
-
+                  
       // TODO: figure out the mul/div situation
       MUL, MULI, MULUI: func = op_mul;
       DIV, DIVI, DIVUI: begin
-        if (op_b == 0) begin
+        if (op_b == '0) begin
           func = op_passb;
           cdb_pkt.exc = `TRUE;
         end
         else func = op_div;
       end
       MOD, MODI: func = op_mod;
-      default:
+      default: begin
+        func = op_unknown;
         cdb_pkt.exc = `TRUE;
+      end
     endcase
   end
-
+  
 endmodule
 
 module alu(
@@ -201,15 +206,17 @@ module alu(
   output n
 );
   logic [`XLEN:0] val;
-
+  
   assign f = val[`XLEN-1:0];
   assign co = val[`XLEN];
   assign v = a[`XLEN-2] ^ b[`XLEN-2] ^ val[`XLEN];
   assign z = (f == '0);
   assign n = val[`XLEN-1];
-
+  
   always_comb begin
     case (func)
+      op_nop:
+        val = 'hb00b;
       op_add:
         val = a + b + ci;
       op_sub:

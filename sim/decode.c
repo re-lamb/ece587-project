@@ -575,7 +575,10 @@ Instruction decode(uint16_t value)
             if (value & SIGNBIT(7)) this.imm |= 0xff00;
 
             this.func = add;            // add imm + Dm/Am
-            if (funct1) this.rd = AREG(m);
+            if (funct1) {
+                this.rs1 = AREG(m);
+                this.rd = AREG(m);
+            }
             break;
 
         case 12:

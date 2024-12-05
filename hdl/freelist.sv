@@ -20,10 +20,10 @@ module freelist(
 
   input [1:0] freelist_en,          // free list reqs from decode
   input [1:0] freelist_t_en,
-
+  
   output [1:0] freelist_rdy,        // valid free reg
   output [1:0][`PRW-1:0] next_free,      // free reg name
-
+  
   output [1:0] freelist_t_rdy,
   output [1:0][`TRW-1:0] next_free_t
 );
@@ -46,38 +46,38 @@ module freelist(
   always_comb begin
     next_free_idx[0] <= '0;
     next_free_idx[1] <= '0;
-    rdy[0] <= '0;
-    rdy[1] <= '0;
+    rdy[0] <= `FALSE;
+    rdy[1] <= `FALSE;
 
-    for (int i = 31; i >= 0; i--) begin
+    for (int i = `PREGS-1; i >= 0; i--) begin
       if (bitmap[0][i] == 1'b1) begin
         next_free_idx[0] <= i;
-        rdy[0] <= 1'b1;
+        rdy[0] <= `TRUE;
         break;
       end
     end
 
-    for (int i = 31; i >= 0; i--) begin
-      if (bitmap[1][i]  == 1'b1) begin
+    for (int i = `PREGS-1; i >= 0; i--) begin
+      if (bitmap[1][i] == 1'b1) begin
         next_free_idx[1] <= i;
-        rdy[1] <= 1'b1;
+        rdy[1] <= `TRUE;
         break;
       end
     end
   end
-
+  
   assign freelist_rdy[0] = rdy[0];
   assign next_free[0] = next_free_idx[0];
 
   // if it's the last free and inst0 doesn't want it, offer it to inst1
   assign freelist_rdy[1] = (rdy[0] && !freelist_en[0] && !rdy[1]) ? rdy[0] : rdy[1];
   assign next_free[1] = (rdy[0] && !freelist_en[0] && !rdy[1]) ? next_free_idx[0] : next_free_idx[1];
-
-
+  
+    
   logic [1:0][3:0] next_free_t_idx;
-  logic [1:0][15:0] bitmap_t;
+  logic [1:0][`TREGS-1:0] bitmap_t;
   logic [1:0] rdy_t;
-  logic [15:0] set_mask_t, clear_mask_t;
+  logic [`TREGS-1:0] set_mask_t, clear_mask_t;
 
   assign bitmap_t[1] = (bitmap_t[0] & ~(1 << next_free_t[0]));
   assign set_mask_t = (retire_t_en[0] ? (1 << next_retire_t[0]) : '0) | (retire_t_en[1] ? (1 << next_retire_t[1]) : '0);
@@ -93,21 +93,21 @@ module freelist(
   always_comb begin
     next_free_t_idx[0] <= '0;
     next_free_t_idx[1] <= '0;
-    rdy_t[0] <= '0;
-    rdy_t[1] <= '0;
+    rdy_t[0] <= `FALSE;
+    rdy_t[1] <= `FALSE;
 
-    for (int i = 15; i > 0; i--) begin
+    for (int i = `TREGS-1; i >= 0; i--) begin
       if (bitmap_t[0][i] == 1'b1) begin
         next_free_t_idx[0] <= i;
-        rdy_t[0] <= 1'b1;
+        rdy_t[0] <= `TRUE;
         break;
       end
     end
 
-    for (int i = 31; i >= 0; i--) begin
+    for (int i = `TREGS-1; i >= 0; i--) begin
       if (bitmap_t[1][i]  == 1'b1) begin
         next_free_t_idx[1] <= i;
-        rdy_t[1] <= 1'b1;
+        rdy_t[1] <= `TRUE;
         break;
       end
     end

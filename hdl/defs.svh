@@ -41,10 +41,10 @@
 
 typedef enum logic [1:0]
 {
-    BP_SNT = 0,
-    BP_WNT = 1,
-    BP_WT = 2,
-    BP_ST = 3
+		BP_SNT = 0,
+		BP_WNT = 1,
+		BP_WT = 2,
+		BP_ST = 3
 } Bp_state_t;
 
 typedef struct packed
@@ -108,6 +108,7 @@ typedef struct packed
 
 typedef enum logic [4:0] 
 {
+  op_nop,
   op_add,
   op_sub,
   op_passb,  
@@ -126,7 +127,8 @@ typedef enum logic [4:0]
   op_bclr,
   op_bset,
   op_bnot,
-  op_btst
+  op_btst,
+  op_unknown
 } Alu_op_t;
 
 typedef enum logic [15:0] {

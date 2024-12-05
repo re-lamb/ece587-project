@@ -34,48 +34,56 @@ module reorder(
   output map_t_wr_en,
   output [`TRW-1:0] map_t_wr_data,
   
-  output [`ALEN-1:0] bp_addr,
-  output [`ALEN-1:0] bp_target,
+  output [1:0][`ALEN-1:0] bp_addr,
+  output [1:0][`ALEN-1:0] bp_target,
   output [1:0][1:0] bp_state,
   output [1:0] bp_wr
 );
   Inst_t [`ROBSZ-1:0] entry;
   logic [`ROBSZ-1:0] update_br;
-  logic [`RBW-1:0] rob_head, rob_tail;
+  logic [`RBW-1:0] rob_head, rob_head_plus, rob_tail, rob_tail_plus;
   logic [`RBW-1:0] next_head, next_tail;
-  logic [`RBW:0] rob_cnt, next_cnt; //next_add, next_sub;
+  logic [`RBW:0] rob_cnt, next_cnt, next_add, next_sub;
   logic [1:0] rob_ret_en;
   logic rollback, rollback_start;
   
-  assign next_head = (rob_wr_en[1]) ? rob_head + 2 : (rob_wr_en[0]) ? rob_head + 1 : rob_head;
-  assign next_tail = (rob_ret_en[1]) ? rob_tail + 2 : (rob_ret_en[0]) ? rob_tail + 1 : rob_tail;
-  //assign next_add = (rob_wr_en[1]) ? 2 : (rob_wr_en[0]) ? 1 : 0;
-  //assign next_sub = (rob_ret_en[1]) ? 2 : (rob_ret_en[0]) ? 1 : 0;
-  assign next_cnt = rob_cnt + rob_wr_en[0] + rob_wr_en[1] - rob_ret_en[0] - rob_ret_en[1]; //rob_cnt + next_add - next_sub;
+  assign next_head = (rob_wr_en[1]) ? rob_head + 'h2 : (rob_wr_en[0]) ? rob_head + 'h1 : rob_head;
+  assign next_tail = (rob_ret_en[1]) ? rob_tail + 'h2 : (rob_ret_en[0]) ? rob_tail + 'h1 : rob_tail;
+  assign next_add = (rob_wr_en[1]) ? 'h2 : (rob_wr_en[0]) ? 'h1 : '0;
+  assign next_sub = (rob_ret_en[1]) ? 'h2 : (rob_ret_en[0]) ? 'h1 : '0;
+  assign next_cnt = rob_cnt + next_add - next_sub;
+  //assign next_cnt = rob_cnt + rob_wr_en[0] + rob_wr_en[1] - rob_ret_en[0] - rob_ret_en[1]; //rob_cnt + next_add - next_sub;
   
-  assign rob_rdy[0] = (rob_cnt < `ROBSZ) && !(rollback_start || rollback) ? '1 : '0;
-  assign rob_rdy[1] = ((rob_cnt + 1) < `ROBSZ) && !(rollback_start || rollback) ? '1 : 0;
+  assign rob_rdy[0] = (rob_cnt < `ROBSZ) && !(rollback_start || rollback) ? `TRUE : `FALSE;
+  assign rob_rdy[1] = ((rob_cnt + 1) < `ROBSZ) && !(rollback_start || rollback) ? `TRUE : `FALSE;
+  
+  assign rob_head_plus = rob_head + 'h1;
+  assign rob_tail_plus = rob_tail + 'h1;
   
   assign next_rob[0] = rob_head;
-  assign next_rob[1] = rob_head + 1;
+  assign next_rob[1] = rob_head_plus;
+  
+  
   
   assign rob_ret_en[0] = (entry[rob_tail].valid && entry[rob_tail].done && !entry[rob_tail].exc);
-  assign rob_ret_en[1] = (rob_ret_en[0] && entry[rob_tail + 1].valid && entry[rob_tail + 1].done && !entry[rob_tail + 1].exc);
+  assign rob_ret_en[1] = (rob_ret_en[0] && entry[rob_tail_plus].valid && entry[rob_tail_plus].done && !entry[rob_tail_plus].exc);
   
   // don't delay, rollback today
-  assign rollback_start = ((entry[rob_tail].valid && entry[rob_tail].exc) | (entry[rob_tail + 1].valid && entry[rob_tail + 1].exc)) ? '1 : '0;
+  assign rollback_start = ((entry[rob_tail].valid && entry[rob_tail].exc) | (entry[rob_tail_plus].valid && entry[rob_tail_plus].exc)) ? `TRUE : `FALSE;
                           
   // TODO: placeholder 
   assign recovery_en = rollback_start;
-  assign recovery_addr = (entry[rob_tail].valid && entry[rob_tail].exc) ? entry[rob_tail].npc : entry[rob_tail + 1].npc;
+  assign recovery_addr = (entry[rob_tail].valid && entry[rob_tail].exc) ? entry[rob_tail].npc : entry[rob_tail_plus].npc;
  
   // update the bp
   assign bp_addr[0] = entry[rob_tail].pc;
-  assign bp_addr[1] = entry[rob_tail + 1].pc;
+  assign bp_addr[1] = entry[rob_tail_plus].pc;
   assign bp_target[0] = entry[rob_tail].npc;
-  assign bp_target[1] = entry[rob_tail + 1].npc;
+  assign bp_target[1] = entry[rob_tail_plus].npc;
   assign bp_wr[0] = (entry[rob_tail].valid && entry[rob_tail].done && update_br[rob_tail]);
-  assign bp_wr[1] = (!entry[rob_tail].exc && entry[rob_tail + 1].valid && entry[rob_tail + 1].done && update_br[rob_tail + 1]);
+  assign bp_wr[1] = (!entry[rob_tail].exc && entry[rob_tail_plus].valid && entry[rob_tail_plus].done && update_br[rob_tail_plus]);
+  assign bp_state[0] = entry[rob_tail].bp_state;
+  assign bp_state[1] = entry[rob_tail_plus].bp_state;
  
   // return reg to free list on retirement/rollback
   assign retire_en[0] = (rollback) ? (entry[rob_head].valid && entry[rob_head].wb) : 
@@ -86,29 +94,29 @@ module reorder(
                                        (rob_ret_en[0] && entry[rob_tail].wbt);
   assign next_retire_t[0] = (rollback) ? entry[rob_head].p_t : entry[rob_tail].t_stale;
   
-  assign retire_en[1] = (rollback) ? (entry[rob_head + 1].valid && entry[rob_head + 1].wb) : 
-                                     (rob_ret_en[1] && entry[rob_tail + 1].wb);
-  assign next_retire[1] = (rollback) ? entry[rob_head + 1].p_rd : entry[rob_tail + 1].rd_stale;
+  assign retire_en[1] = (rollback) ? (entry[rob_head_plus].valid && entry[rob_head_plus].wb) : 
+                                     (rob_ret_en[1] && entry[rob_tail_plus].wb);
+  assign next_retire[1] = (rollback) ? entry[rob_head_plus].p_rd : entry[rob_tail_plus].rd_stale;
   
-  assign retire_t_en[1] = (rollback) ? (entry[rob_head + 1].valid && entry[rob_head + 1].wbt) :
-                                       (rob_ret_en[1] && entry[rob_tail + 1].wbt);
-  assign next_retire_t[1] = (rollback) ? entry[rob_head + 1].p_t : entry[rob_tail + 1].t_stale;
+  assign retire_t_en[1] = (rollback) ? (entry[rob_head_plus].valid && entry[rob_head_plus].wbt) :
+                                       (rob_ret_en[1] && entry[rob_tail_plus].wbt);
+  assign next_retire_t[1] = (rollback) ? entry[rob_head_plus].p_t : entry[rob_tail_plus].t_stale;
   
   // restore original mappings on rollback
   assign map_wr_addr[0] = entry[rob_head].rd;
-  assign map_wr_addr[1] = entry[rob_head + 1].rd;
+  assign map_wr_addr[1] = entry[rob_head_plus].rd;
   
   assign map_wr_data[0] = entry[rob_head].rd_stale;
-  assign map_wr_data[1] = entry[rob_head + 1].rd_stale;
+  assign map_wr_data[1] = entry[rob_head_plus].rd_stale;
   
   assign map_wr_en[0] = (rollback && entry[rob_head].valid && entry[rob_head].wb);
-  assign map_wr_en[1] = (rollback && entry[rob_head + 1].valid && entry[rob_head + 1].wb && 
-                        (entry[rob_head].rd != entry[rob_head + 1].rd));
+  assign map_wr_en[1] = (rollback && entry[rob_head_plus].valid && entry[rob_head_plus].wb && 
+                        (entry[rob_head].rd != entry[rob_head_plus].rd));
   
-  assign map_t_wr_en = rollback && (entry[rob_head].valid && entry[rob_head].wbt) | 
-                                   (entry[rob_head + 1].valid && entry[rob_head + 1].wbt);
+  assign map_t_wr_en = rollback && ((entry[rob_head].valid && entry[rob_head].wbt) || 
+                                    (entry[rob_head_plus].valid && entry[rob_head_plus].wbt));
   assign map_t_wr_data = (rollback && entry[rob_head].valid && entry[rob_head].wbt) ? entry[rob_head].t_stale : 
-                                                                                      entry[rob_head + 1].t_stale;
+                                                                                      entry[rob_head_plus].t_stale;
   
   always @(posedge clk) begin
     if (rst) begin
@@ -117,32 +125,32 @@ module reorder(
       rob_cnt   <= '0;
       rollback  <= '0;
       update_br <= '0;
-      entry   <= '0;
+      entry   	<= '0;
     end
-    else if (entry[rob_tail].inst == EXIT | entry[rob_tail + 1].inst == EXIT) begin
+    else if (entry[rob_tail].inst == EXIT | entry[rob_tail_plus].inst == EXIT) begin
       $display("exit encountered at %x", entry[rob_tail].pc);
       $finish;
     end 
     else if (rollback) begin      // rebuild state on mispredict/exception
       if (rob_cnt >= 2) begin
-        entry[rob_head].valid     <= `FALSE;
-        entry[rob_head + 1].valid <= `FALSE;
-        update_br[rob_head]       <= `FALSE;
-        update_br[rob_head + 1]   <= `FALSE;
-        rob_head <= rob_head - 2;
-        rob_cnt  <= rob_cnt - 2;
+        entry[rob_head].valid      <= `FALSE;
+        entry[rob_head_plus].valid <= `FALSE;
+        update_br[rob_head]        <= `FALSE;
+        update_br[rob_head_plus]   <= `FALSE;
+        rob_head <= rob_head - 'h2;
+        rob_cnt  <= rob_cnt - 'h2;
         if (rob_cnt == 2)
           rollback <= '0;
       end
       else if (rob_cnt > 0) begin
         entry[rob_head].valid <= `FALSE;
         update_br[rob_head]   <= `FALSE;
-        rob_head <= rob_head - 1;
+        rob_head <= rob_head - 'h1;
         rob_cnt  <= '0;
         rollback <= '0;
       end
     end
-    else begin
+    else begin					// normal operation
       rob_head <= next_head;
       rob_tail <= next_tail;
       rob_cnt  <= next_cnt;
@@ -172,11 +180,11 @@ module reorder(
       if (rob_ret_en[0])
         entry[rob_tail].valid <= `FALSE;
       if (rob_ret_en[1])
-        entry[rob_tail + 1].valid <= `FALSE;
+        entry[rob_tail_plus].valid <= `FALSE;
       
       // only handle oldest exception
       if (rollback_start && !rollback)
-        rollback <= '1;
+        rollback <= `TRUE;
     end
   end
   
