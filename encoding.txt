@@ -11,7 +11,7 @@ ffff_siii_iiii_iiii i12
                iiii - always pass
           iiii      - pass  / i[7]
      iiii           - pass  / i[7] / 0 
-ssss				        - i[11] / i[7] / 0
+ssss                - i[11] / i[7] / 0
 
 nr:                     ffff_ffff_ffff_ffff
 nop                     0000_0000_0000_0000
