@@ -63,10 +63,10 @@
 0010_1mmm_0nnn_1100		div   	Dn,Dm           Dm / Dn -> Dm(high 16b)             // 16 bit div   
 0010_1mmm_1nnn_0101		mod   	Dn,Dm           Dm % Dn -> Dm(low 16b)              // 16 bit remainder	
 
-0010_1mmm_1nnn_1000		bclr    Dn,Dm			0 -> Dm[Dn]                         // bit clear
-0010_1mmm_1nnn_1001		bset    Dn,Dm			1 -> Dm[Dn]                         // bit set
-0010_1mmm_1nnn_1010		bnot    Dn,Dm			~Dm[Dn] -> Dm[Dn]                   // bit flip
-0010_1mmm_1nnn_1011		btst    Dn,Dm			Dm[Dn] -> T                         // bit test
+0010_1mmm_1nnn_1000		bclr    Dn,Dm		0 -> Dm[Dn]                         // bit clear
+0010_1mmm_1nnn_1001		bset    Dn,Dm		1 -> Dm[Dn]                         // bit set
+0010_1mmm_1nnn_1010		bnot    Dn,Dm		~Dm[Dn] -> Dm[Dn]                   // bit flip
+0010_1mmm_1nnn_1011		btst    Dn,Dm		Dm[Dn] -> T                         // bit test
 	
 0011_0mmm_s000_iiii		bclri   #imm5,Dm        0 -> Dm[imm]                        // bit clear
 0011_0mmm_s001_iiii		bseti   #imm5,Dm        1 -> Dm[imm]                        // bit set
@@ -108,9 +108,9 @@
 1110_siii_iiii_iiii		bra     label           disp*2 + PC -> PC                   // branch
 1111_siii_iiii_iiii		bsr     label           PC -> A0, disp*2 + PC -> PC         // branch subroutine
 	
-						**lvbr  Dm              Dm -> VBR                           // write VBR
-						**svbr  Dm              VBR -> Dm                           // read VBR
-						**trap  #imm            imm*2 + VBR -> PC, PC + 2 -> A0     // trap
+				**lvbr  Dm              Dm -> VBR                           // write VBR
+				**svbr  Dm              VBR -> Dm                           // read VBR
+				**trap  #imm            imm*2 + VBR -> PC, PC + 2 -> A0     // trap
 	
 
 
