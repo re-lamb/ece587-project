@@ -4,7 +4,6 @@ ffff_fmmm_fnnn_ffff rr
 ffff_fmmm_sfff_iiii ri5
 ffff_fmmm_siii_iiii ri8
 ffff_fmmm_snnn_iiii rri5
-ffff_ffff_sfff_iiii i5
 ffff_ffff_siii_iiii i8
 ffff_siii_iiii_iiii i12
 
@@ -96,10 +95,10 @@ mod.b   Dn,Dm           0010_1mmm_1nnn_0100 *** remove
 mod.w   Dn,Dm           0010_1mmm_1nnn_0101 *** mod.w -> mod
 mod.l   Dn,Dm           0010_1mmm_1nnn_0110 *** 
 
-bclr    Dn,Dm			      0010_1mmm_1nnn_1000
-bset    Dn,Dm			      0010_1mmm_1nnn_1001
-bnot    Dn,Dm			      0010_1mmm_1nnn_1010
-btst    Dn,Dm			      0010_1mmm_1nnn_1011
+bclr    Dn,Dm           0010_1mmm_1nnn_1000
+bset    Dn,Dm           0010_1mmm_1nnn_1001
+bnot    Dn,Dm           0010_1mmm_1nnn_1010
+btst    Dn,Dm           0010_1mmm_1nnn_1011
 
 ri5:                    0011_fmmm_sfff_iiii
 bclri   #imm5,Dm        0011_0mmm_s000_iiii
