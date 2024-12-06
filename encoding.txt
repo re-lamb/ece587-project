@@ -11,7 +11,7 @@ ffff_siii_iiii_iiii i12
                iiii - always pass
           iiii      - pass  / i[7]
      iiii           - pass  / i[7] / 0 
-ssss				- i[11] / i[7] / 0
+ssss				        - i[11] / i[7] / 0
 
 nr:                     ffff_ffff_ffff_ffff
 nop                     0000_0000_0000_0000
@@ -96,10 +96,10 @@ mod.b   Dn,Dm           0010_1mmm_1nnn_0100 *** remove
 mod.w   Dn,Dm           0010_1mmm_1nnn_0101 *** mod.w -> mod
 mod.l   Dn,Dm           0010_1mmm_1nnn_0110 *** 
 
-bclr    Dn,Dm			0010_1mmm_1nnn_1000
-bset    Dn,Dm			0010_1mmm_1nnn_1001
-bnot    Dn,Dm			0010_1mmm_1nnn_1010
-btst    Dn,Dm			0010_1mmm_1nnn_1011
+bclr    Dn,Dm			      0010_1mmm_1nnn_1000
+bset    Dn,Dm			      0010_1mmm_1nnn_1001
+bnot    Dn,Dm			      0010_1mmm_1nnn_1010
+btst    Dn,Dm			      0010_1mmm_1nnn_1011
 
 ri5:                    0011_fmmm_sfff_iiii
 bclri   #imm5,Dm        0011_0mmm_s000_iiii
